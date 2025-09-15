@@ -3,24 +3,99 @@
 \usepackage{amsmath}
 \usepackage{siunitx}
 \usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{cite}
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+
+\captionsetup{font=footnotesize}
 
 \begin{document}
+\begin{titlepage}
+  \centering
+  \vspace*{2cm}
+  {\LARGE\bfseries Lightcone Scaling in PYTHIA and the Lund String Model \par}
+  \vspace{1.5cm}
+  \Large Jade Abidi \par
+  \vspace{0.5cm}
+  \large Student ID: 31461964 \par
+  \vspace{0.5cm}
+  {\large A thesis submitted for the degree of \bfseries{Bachelor of Science (Honours)}} \par
+  \vspace{0.5cm}
+  \large November 2025 \par
+  \vspace{0.5cm}
+  \vfill
+  \large School of Physics and Astronomy \\ Monash University \par
+  \vspace{0.5cm}
+  \large Supervisor: Peter Skands \par
+  \vfill
+\end{titlepage}
 
-\title{Lightcone Scaling in PYTHIA and the Lund String Model}
-\author{Jade Abidi}
-\date{\today}
-\maketitle
+\pagebreak
 
 \begin{abstract}
   It's too abstract!
 \end{abstract}
 
+\pagebreak
+
 \tableofcontents
 
 \chapter{Introduction}
-Hiii \cite{einstein1905}.
 
-\bibliographystyle{plain}
+\chapter{QCD, the Lund Model, and PYTHIA}
+\section{Quantum Chromodynamics and Collider Physics}
+
+\section{Monte Carlo Event Generators and PYTHIA}
+
+\section{The Lund String Model}
+\label{sec:lsm}
+
+\chapter{String Fragmentation in PYTHIA}
+\section{The PYTHIA Fragmentation Algorithm}
+Having established the theoretical basis of the Lund string model for hadronisation, we can now describe how the hadronisation process is algorithmically implemented in PYTHIA. We begin by outlining what a ``successful'' implementation of the Lund string model would achieve. As mentioned in section \hyperref[sec:lsm]{2.3}, the 1+1-dimensional kinematics (((TODO: Maybe rephrase this?))) of string fragmentation in a single event that produces $N$ hadrons are completely specified by a set of $N$ absolute lightcone momentum fractions $\{ z_{\text{abs},i}^+ \}$, where we are considering fragmentation right-to-left (but could just as well consider it left-to-right).
+
+To conserve energy and momentum, these lightcone momentum fractions must add to unity, that is,
+\begin{equation}
+  \sum_{i=1}^N z_{\text{abs},i}^+ = 1.
+\end{equation}
+
+The area law and lightcone scaling properties of the Lund string model require that the relative lightcone momentum fractions $\{ z_i^+ \}$ of a single event (as defined in section \hyperref[sec:lsm]{2.3}) are all drawn from a given fragmentation function $f(z)$ --- specifically, the Lund symmetric fragmentation function specified in equation (((insert equation here))).
+
+Also established in section \hyperref[sec:lsm]{2.3} is the fact that the quarks produced along the string must have masses $m_q$ and transverse momenta $p_{\perp,q}$ drawn from a distribution $\text{Pr}(m_q^2, p_{\perp,q}^2)$ with a Gaussian suppression, as in equation (((insert equation here))). The resulting hadrons formed from these quarks (and antiquarks) must have masses and transverse momenta distributed accordingly.
+
+(((TODO: Is this a good description? Is this necessary? What about the distribution of $N$?)))
+
+The actual implementation of string fragmentation in PYTHIA is given by the high-level pseudocode in (((link))). Here, we are considering the simplest fragmentation process where a quark $q_0$ and antiquark $\bar{q}_0$ move in opposite directions along the $z$-axis with centre-of-mass energy $E_\text{CM}$. An actual event in PYTHIA will contain many such processes between different partons produced in the parton shower, and will also require the consideration of gluon kinks along the strings. (((TODO, elaborate, make less vague))) However, as we will see, lightcone scaling is entirely violated in PYTHIA even in this minimal situation, and as such the rest of this thesis will be limited to simple $q \bar{q}$ hadronisation.
+
+
+
+\section{The Joining Step}
+
+\section{Rapidity Plateaus, Joining Step Parameters and Phase Space}
+
+\chapter{Tuning Lightcone Scaling in PYTHIA}
+\section{Similarity Indices of Rapidity Spacing and Hadronic Chemistry}
+
+\section{The probUndo parameter}
+
+\section{A Numerical Burn-in Optimisation Algorithm}
+
+\section{Limitations}
+
+\chapter{The Accordion Model for String Fragmentation}
+\section{Introduction}
+
+\section{Analytical Framework}
+
+\section{Pseudocode}
+
+\section{Code and Results}
+
+\chapter{Summary and Outlook}
+
+\bibliographystyle{JHEP}
 \bibliography{references}
 
 \end{document}
