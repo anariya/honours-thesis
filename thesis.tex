@@ -6,6 +6,9 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{cite}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
 \usepackage[a4paper, margin=2.5cm]{geometry}
 \usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
 
@@ -35,7 +38,7 @@
 \pagebreak
 
 \begin{abstract}
-  It's too abstract!
+Monte Carlo event generators like PYTHIA are used to simulate high-energy particle collision events involving non-perturbative physics. In PYTHIA, the strong field between a $q\bar{q}$ pair is modelled as a classical string with constant tension, implying that the string fragmentation process should be self-similar at all points along the string. This property is currently violated at the step where string ends are joined, causing a dip in the rapidity plateau and anomalous hadronic chemistry. We introduce an additional tunable parameter and a new algorithm for string fragmentation that improve or resolve these issues, albeit with some limitations.
 \end{abstract}
 
 \pagebreak
@@ -43,9 +46,14 @@
 \tableofcontents
 
 \chapter{Introduction}
+The field of particle physics is dedicated to investigating the most fundamental particles and interactions in nature. It naturally evolved from nuclear and atomic physics in the early 20th century as technological and scientific knowledge allowed scientists to probe matter at higher energies and smaller length scales. The physical theory underpinning particle physics developed out of quantum field theory, culminating in the Standard Model of particle physics which was formalised in the 1980s. The Standard Model unifies three of the four fundamental forces of nature (electromagnetism, the weak force, and the strong force) into a single theory, and predicted the existence of the Higgs boson well before its historic discovery at the Large Hadron Collider (LHC) in 2012.
+
+Particle physics experiments typically require particle colliders like the LHC. Such colliders accelerate charged particles, typically electrons or protons, to speeds up to 99.99999\% of the speed of light. Modern particle colliders are usually circular, and use high voltages and strong magnetic fields to accelerate particles and keep them within a thin beamline. These beamlines are then made to collide at interaction points, around which bespoke detector systems are able to collect data on the final state. 
 
 \chapter{QCD, the Lund Model, and PYTHIA}
+
 \section{Quantum Chromodynamics and Collider Physics}
+
 
 \section{Monte Carlo Event Generators and PYTHIA}
 
@@ -69,6 +77,35 @@ Also established in section \hyperref[sec:lsm]{2.3} is the fact that the quarks 
 
 The actual implementation of string fragmentation in PYTHIA is given by the high-level pseudocode in (((link))). Here, we are considering the simplest fragmentation process where a quark $q_0$ and antiquark $\bar{q}_0$ move in opposite directions along the $z$-axis with centre-of-mass energy $E_\text{CM}$. An actual event in PYTHIA will contain many such processes between different partons produced in the parton shower, and will also require the consideration of gluon kinks along the strings. (((TODO, elaborate, make less vague))) However, as we will see, lightcone scaling is entirely violated in PYTHIA even in this minimal situation, and as such the rest of this thesis will be limited to simple $q \bar{q}$ hadronisation.
 
+\begin{algorithm}
+  \caption{The default PYTHIA 8.3 algorithm for $q\bar{q}$ hadronisation} \label{alg:default}
+  \begin{algorithmic}
+    \Procedure{Fragment}{$E_\text{CM}, flav(q_0), flav(\bar{q}_0)$}
+    \State initialise event record $event$
+    \State $i \gets 1$
+    \State $p_x(q_0) \gets 0.0$
+    \State $p_y(q_0) \gets 0.0$
+    \State $p_x(\bar{q}_0) \gets 0.0$
+    \State $p_y(\bar{q}_0) \gets 0.0$
+    \Loop
+    \State $fromPos \gets$ true or false with equal probability
+    \State $flav(q_i) \gets$ flavour according to Gaussian suppression ((equation)) and PYTHIA weights
+    \State $flav(\bar{q}_i) \gets$ antiflavour of $flav(q_i)$
+    \State $p_x(q_i) \gets$ transverse momentum according to Gaussian suppression ((equation))
+    \State $p_x(\bar{q}_i) \gets -p_x(q_i)$
+    \State $p_y(q_i) \gets$ transverse momentum according to Gaussian suppression ((equation))
+    \State $p_y(\bar{q}_i) \gets -p_y(q_i)$ \Comment {String break done.}
+    \If{fromPos}
+    \State $event[i].id \gets$ hadron selected from combination of $flav(q_{i-1}$ and $flav(\bar{q}_i)$
+    \State $event[i].m \gets$ mass selected according to Breit-Wigner distribution
+    \State $event[i].p_x \gets p_x(q_{i-1}) + p_x(\bar{q}_i)$
+    \State $event[i].p_y \gets p_y(q_{i-1}) + p_y(\bar{q}_i)$
+    \Else
+    \EndIf
+    \EndLoop
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
 
 
 \section{The Joining Step}
@@ -78,7 +115,7 @@ The actual implementation of string fragmentation in PYTHIA is given by the high
 \chapter{Tuning Lightcone Scaling in PYTHIA}
 \section{Similarity Indices of Rapidity Spacing and Hadronic Chemistry}
 
-\section{The probUndo parameter}
+\section{The probRevertBreak parameter}
 
 \section{A Numerical Burn-in Optimisation Algorithm}
 

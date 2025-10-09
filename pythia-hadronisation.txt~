@@ -1,0 +1,15 @@
+## Pseudocode for q-qbar hadronisation in PYTHIA.
+
+iTry <- 0
+stopMassNow <- stopMass
+do:
+  if (iTry > nTryJoin - nStopMass):
+    if (q_0 or qbar_0 is c,b,t):
+      stopMassNow *= facStopMass ^ 2
+    else:
+      stopMassNow *= facStopMass
+
+  pRem <- pSum
+
+  do:
+    fromPos <- random < 0.5
