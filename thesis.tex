@@ -48,7 +48,11 @@ Monte Carlo event generators like PYTHIA are used to simulate high-energy partic
 \chapter{Introduction}
 The field of particle physics is dedicated to investigating the most fundamental particles and interactions in nature. It naturally evolved from nuclear and atomic physics in the early 20th century as technological and scientific knowledge allowed scientists to probe matter at higher energies and smaller length scales. The physical theory underpinning particle physics developed out of quantum field theory, culminating in the Standard Model of particle physics which was formalised in the 1980s. The Standard Model unifies three of the four fundamental forces of nature (electromagnetism, the weak force, and the strong force) into a single theory, and predicted the existence of the Higgs boson well before its historic discovery at the Large Hadron Collider (LHC) in 2012.
 
-Particle physics experiments typically require particle colliders like the LHC. Such colliders accelerate charged particles, typically electrons or protons, to speeds up to 99.99999\% of the speed of light. Modern particle colliders are usually circular, and use high voltages and strong magnetic fields to accelerate particles and keep them within a thin beamline. These beamlines are then made to collide at interaction points, around which bespoke detector systems are able to collect data on the final state. 
+Particle physics experiments typically require particle colliders like the LHC. Such colliders accelerate charged particles, typically electrons or protons, to speeds up to 99.99999\% of the speed of light. Modern particle colliders are usually circular, and use high voltages and strong magnetic fields to accelerate particles and keep them within a thin beamline. These beamlines are then made to collide at interaction points, around which bespoke detector systems are able to collect data on the final state.
+
+\begin{enumerate}
+\item Finish the introduction.
+\end{enumerate}
 
 \chapter{QCD, the Lund Model, and PYTHIA}
 
@@ -74,6 +78,7 @@ Particle physics experiments typically require particle colliders like the LHC. 
 \item Sketch the history of Monte Carlo event generators, including JETSET, PYTHIA, HERWIG, and more. Outline differences between these generators.
 \item Elaborate on the history and features of PYTHIA. Include a few potential uses.
 \item Explain how an event is generated in PYTHIA. Include a high-level mathematical formulation of the hard scattering, parton shower, hadronisation, and decays. Introduce and explain why factorisation allows us to consider different energy scales of event generation independently of each other.
+\item Figure: That big cool looking one from the PYTHIA documentation.
 \item Elaborate on the hadronisation process. Emphasise the necessity of phenomenological models due to the non-perturbative physics involved. Signpost the Lund model.
 \item Explain the necessity of tuning and how this process works.
 \end{enumerate}
@@ -103,6 +108,7 @@ Particle physics experiments typically require particle colliders like the LHC. 
 \item Outline what a successful implementation of the Lund model would achieve. Note how the problem is somewhat undefined in terms of energy-momentum conservation. 
 \item Explain the current hadronisation algorithm in PYTHIA.
 \item Outline the Eden paper and how the PYTHIA manuals describe the joining step and energy-momentum conservation in PYTHIA and the Lund model.
+\item Pseudocode: The PYTHIA hadronisation algorithm.
   
 \end{enumerate}
 
@@ -153,6 +159,7 @@ The actual implementation of string fragmentation in PYTHIA is given by the high
 
 \section{The Joining Step}
 \begin{enumerate}
+\item Pseudocode: The PYTHIA finalTwo
 \item Explain in close detail how the finalTwo joining step works in PYTHIA.
 \item Explain the stopMass, stopNewFlav, and stopSmear parameters work.
 \item Note the inherent violation of lightcone scaling. Explain how the manual and documentation claim this is resolved.
@@ -160,9 +167,10 @@ The actual implementation of string fragmentation in PYTHIA is given by the high
 
 \section{Performance of the Current finalTwo Procedure}
 \begin{enumerate}
-\item Figure: dN/dy distributions in PYTHIA 8.3 vs 8.0 vs 6
+\item Figure: dN/dy distributions in PYTHIA 8.3 vs 8.0 vs 6, for varying string lengths.
 \item Explain how bad the problem is with rapidity distributions. Also mention the tune loading bug.
 \item Explain why this happens in terms of the stopMass parameter, rapidity spacing, and fragmentation functions, as well as the non-uniformity of the joining step rank.
+\item Figure: W_rem plots for the joining step across different versions, as well as rapidity spacing plots.
 \item Data: Example ratio differences and SSE of hadronic chemistry in the joining step, PYTHIA 6 vs 8.
 \item Explain the bias introduced by the finalTwo failure rate and how this leads to an anomalous hadronic chemistry.
 \end{enumerate}
@@ -173,6 +181,7 @@ The actual implementation of string fragmentation in PYTHIA is given by the high
 \item Explain the necessity of tuning the joining step, in contradiction to what was asserted by the manual.
 \item Explain the tradeoff between hadronic chemistry and kinematics of the joining step hadrons, and the difficulty in tuning for both with only one degree of freedom.
 \item Data: Rapidity plateaus, SSEs of rapidity plateaus and hadronic chemistry across different joining step parameters and tunes.
+\item Figure: Plots of SSEs across parameters and tunes.
 \end{enumerate}
 
 \section{The probRevertBreak parameter}
