@@ -18,7 +18,7 @@
 \begin{titlepage}
   \centering
   \vspace*{2cm}
-  {\LARGE\bfseries Lightcone Scaling in PYTHIA and the Lund String Model \par}
+  {\LARGE\bfseries Restoring string fragmentation self-similiarity in PYTHIA hadronisation \par}
   \vspace{1.5cm}
   \Large Jade Abidi \par
   \vspace{0.5cm}
@@ -53,15 +53,59 @@ Particle physics experiments typically require particle colliders like the LHC. 
 \chapter{QCD, the Lund Model, and PYTHIA}
 
 \section{Quantum Chromodynamics and Collider Physics}
-
+\begin{enumerate}
+\item Explain the history of quantum, atomic, and nuclear physics.
+\item Explain the development of quantum field theory and lay out the QFT basics.
+\item Explain the development of QCD and the Standard Model.
+\item Figure: Running coupling of QED.
+\item Figure: Running coupling of QCD.
+\item Explain quantum chromodynamics, including SU(3) gauge symmetry, asymptotic freedom, gluon-gluon interactions, and confinement.
+\item Pivot to experiment. Explain why particle colliders are necessary. Explain what they do and how they work.
+\item Explain how detector systems work in colliders, and what these detectors output.
+\item Figure: The ALICE detector at the LHC.
+\item Explain concepts like luminosity and cross sections. Provide an outline of important experimental discoveries, such as the discovery of gluons in the JADE experiment, or the top quark and Higgs boson in the LHC.
+\item Figure: The discovery of gluons, including the use of JETSET.
+\end{enumerate}
 
 \section{Monte Carlo Event Generators and PYTHIA}
+\begin{enumerate}
+\item Explain what a Monte Carlo event generator is and what role it plays in particle physics.
+\item Explain why Monte Carlo simulation is necessary to generate events, including the difficulties with non-perturbative QCD and numerical calculations like lattice QCD.
+\item Sketch the history of Monte Carlo event generators, including JETSET, PYTHIA, HERWIG, and more. Outline differences between these generators.
+\item Elaborate on the history and features of PYTHIA. Include a few potential uses.
+\item Explain how an event is generated in PYTHIA. Include a high-level mathematical formulation of the hard scattering, parton shower, hadronisation, and decays. Introduce and explain why factorisation allows us to consider different energy scales of event generation independently of each other.
+\item Elaborate on the hadronisation process. Emphasise the necessity of phenomenological models due to the non-perturbative physics involved. Signpost the Lund model.
+\item Explain the necessity of tuning and how this process works.
+\end{enumerate}
 
 \section{The Lund String Model}
 \label{sec:lsm}
+\begin{enumerate}
+\item Introduce the history and development of the Lund string model. Outline a high level of how it models hadronisation using string breaks.
+\item Figure: Hadronisation according to the Lund model.
+\item Explain how the Lund model describes the strong colour field as a flux tube with linear potential.
+\item Explain the experimental and phenomenological justification for the Lund model. Include lattice QCD simulations of the string tension, and the existence of ggg and gggg interaction vertices in QCD as a reason for the flux tube behaviour.
+\item Figure: The electric field vs. the colour field
+\item Introduce the yo-yo mode and explain how it is a model for hadrons in the Lund model. Introduce diquarks.
+\item Figure: Spacetime diagram of the yo-yo mode.
+\item Introduce rapidity and lightcone momenta.
+\item Figure: Rapidity vs velocity.
+\item Explain how string fragmentation works in the Lund model. Establish that the fragmentation process is fully specified by z fractions. Introduce the fragmentation functions and lightcone scaling, as well as the Schwinger mechanism.
+\item Figure: Spacetime diagram of string fragmentation.
+\item Briefly introduce gluon kinks and more complex string topologies.
+\item Figure: String topologies in the Lund model.
+\item Emphasise how the string fragmentation properties are asymptotic in the limit where energy-momentum conservation is not a consideration. 
+\end{enumerate}
 
 \chapter{String Fragmentation in PYTHIA}
 \section{The PYTHIA Fragmentation Algorithm}
+\begin{enumerate}
+\item Outline what a successful implementation of the Lund model would achieve. Note how the problem is somewhat undefined in terms of energy-momentum conservation. 
+\item Explain the current hadronisation algorithm in PYTHIA.
+\item Outline the Eden paper and how the PYTHIA manuals describe the joining step and energy-momentum conservation in PYTHIA and the Lund model.
+  
+\end{enumerate}
+
 Having established the theoretical basis of the Lund string model for hadronisation, we can now describe how the hadronisation process is algorithmically implemented in PYTHIA. We begin by outlining what a ``successful'' implementation of the Lund string model would achieve. As mentioned in section \hyperref[sec:lsm]{2.3}, the 1+1-dimensional kinematics (((TODO: Maybe rephrase this?))) of string fragmentation in a single event that produces $N$ hadrons are completely specified by a set of $N$ absolute lightcone momentum fractions $\{ z_{\text{abs},i}^+ \}$, where we are considering fragmentation right-to-left (but could just as well consider it left-to-right).
 
 To conserve energy and momentum, these lightcone momentum fractions must add to unity, that is,
@@ -107,30 +151,77 @@ The actual implementation of string fragmentation in PYTHIA is given by the high
   \end{algorithmic}
 \end{algorithm}
 
-
 \section{The Joining Step}
+\begin{enumerate}
+\item Explain in close detail how the finalTwo joining step works in PYTHIA.
+\item Explain the stopMass, stopNewFlav, and stopSmear parameters work.
+\item Note the inherent violation of lightcone scaling. Explain how the manual and documentation claim this is resolved.
+\end{enumerate}
 
-\section{Rapidity Plateaus, Joining Step Parameters and Phase Space}
+\section{Performance of the Current finalTwo Procedure}
+\begin{enumerate}
+\item Figure: dN/dy distributions in PYTHIA 8.3 vs 8.0 vs 6
+\item Explain how bad the problem is with rapidity distributions. Also mention the tune loading bug.
+\item Explain why this happens in terms of the stopMass parameter, rapidity spacing, and fragmentation functions, as well as the non-uniformity of the joining step rank.
+\item Data: Example ratio differences and SSE of hadronic chemistry in the joining step, PYTHIA 6 vs 8.
+\item Explain the bias introduced by the finalTwo failure rate and how this leads to an anomalous hadronic chemistry.
+\end{enumerate}
 
 \chapter{Tuning Lightcone Scaling in PYTHIA}
-\section{Similarity Indices of Rapidity Spacing and Hadronic Chemistry}
+\section{Restoring Lightcone Scaling by Tuning Parameters}
+\begin{enumerate}
+\item Explain the necessity of tuning the joining step, in contradiction to what was asserted by the manual.
+\item Explain the tradeoff between hadronic chemistry and kinematics of the joining step hadrons, and the difficulty in tuning for both with only one degree of freedom.
+\item Data: Rapidity plateaus, SSEs of rapidity plateaus and hadronic chemistry across different joining step parameters and tunes.
+\end{enumerate}
 
 \section{The probRevertBreak parameter}
-
-\section{A Numerical Burn-in Optimisation Algorithm}
+\begin{enumerate}
+\item Introduce the probRevertBreak parameter and the pseudocode. Explain how the algorithm works and what is changed. Include formulas for conditional spin switching.
+\item Explain how the probRevertBreak parameter reduces bias and improves hadronic chemistry, as well as providing more freedom to tune the joining step.
+\item Show results (SSEs and rapidity plateaus) of probRevertBreak and the possibility for improvement.
+\end{enumerate}
 
 \section{Limitations}
+\begin{enumerate}
+\item Explain the limitations of this set of parameters, showing plots of rapidity differences at the joining step vs everywhere else.
+\item Re-emphasise how issues like anomalous hadronic chemistry and the rapidity plateau are not fixed.
+\item Note the issues with finalTwo failing. Cite a few papers that are affected by this.
+\end{enumerate}
 
-\chapter{The Accordion Model for String Fragmentation}
-\section{Introduction}
-
-\section{Analytical Framework}
+\chapter{The Accordion Algorithm for String Fragmentation}
+\section{The Accordion Algorithm}
+\begin{enumerate}
+\item Motivate the concept behind the accordion algorithm. Re-emphasise the self-similarity and causal independence of breakup vertices.
+\item Establish the goals of the algorithm - a flat rapidity plateau, correct hadronic chemistry, and a lower failure rate.
+\item Explain how the algorithm works. Derive equations relating rapidity spacing and z fractions. Explain the accordion rescaling and why numerical solution is required.
+\item Elaborate on limitations of the accordion rescaling, including the shaky Lorentz covariance and effect on fragmentation functions. Explain why fragmentation functions may not matter.
+\end{enumerate}
 
 \section{Pseudocode}
+\begin{enumerate}
+\item Show and explain pseudocode of the accordion algorithm.
+\end{enumerate}
 
-\section{Code and Results}
+\section{Results}
+\begin{enumerate}
+\item Show off!
+\end{enumerate}
+
+\section{Limitations}
+\begin{enumerate}
+\item Be honest. But in a nice way.
+\item Not implemented for popcorn model.
+\item Needs to be expanded to gluon kinks and string topolgies - not clear how this might work.
+\item Necessity of tuning stopMass.
+\item Need more investigation into correlations and fragmentation functions.
+\end{enumerate}
 
 \chapter{Summary and Outlook}
+\begin{enumerate}
+\item Summarise the achievements and results, re-establishing their context in the broader field.
+\item Establish further avenues of investigation, including: expanding the scope of the algorithm, improving the rescaling step, improving the rapidity spacing sampling, investigating time complexity and performance, investigating the effects of the rapidity dip in other findings and papers
+\end{enumerate}
 
 \bibliographystyle{JHEP}
 \bibliography{references}
