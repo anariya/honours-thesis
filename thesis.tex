@@ -65,11 +65,49 @@ Particle physics experiments typically require particle colliders like the LHC. 
 \item Figure: Running coupling of QCD.
 \item Explain quantum chromodynamics, including SU(3) gauge symmetry, asymptotic freedom, gluon-gluon interactions, and confinement.
 \item Pivot to experiment. Explain why particle colliders are necessary. Explain what they do and how they work.
-\item Explain how detector systems work in colliders, and what these detectors output.
+\item Explain how detector systems work in colliders, and what these detectors output. Talk about jets.
 \item Figure: The ALICE detector at the LHC.
 \item Explain concepts like luminosity and cross sections. Provide an outline of important experimental discoveries, such as the discovery of gluons in the JADE experiment, or the top quark and Higgs boson in the LHC.
 \item Figure: The discovery of gluons, including the use of JETSET.
 \end{enumerate}
+
+Before introducing PYTHIA and the Lund string model, we first provide an overview of the theoretical models and experimental techniques used in particle physics, with a focus on quantum chromodynamics.
+
+The field of particle physics developed out of the study of atomic and nuclear physics in the early 20th century. Experiments like the discovery of the nucleus in 1911 \cite{rutherford_lxxix_1911} or the neutron in 1932 \cite{chadwick_existence_1932} paved the way for the development of more advanced technologies such as particle accelerators and colliders. The high centre-of-mass energies reached in these experiments allowed for the discovery of a slew of particles in the 1950s and 1960s, dubbed the ``particle zoo'' \cite{gross_50_2023}. Alongside these experiments, the theoretical success of quantum mechanics inspired the quantisation of the electromagnetic field in the original formulation of quantum field theory (QFT) and quantum electrodynamics (QED) by Dirac, who notably predicted the existence of antimatter a number of years before its discovery \cite{dirac_quantum_1928,anderson_apparent_1932}. QED was later unified with a description of the weak force (responsible for phenomena like beta decay) into electroweak theory, a Yang-Mills gauge theory consisting of a local $\text{U}(1) \times \text{SU}(2)$ gauge symmetry \cite{navas_review_2024,thomson_modern_2013}.
+
+At the same time, quantum chromodynamics (QCD) emerged, describing the variety of particles discovered in the ``particle zoo'' as composed of more fundamental subatomic particles --- quarks and gluons. Initial models like the Eightfold Way classified these various strongly interacting particles as hadrons emerging from a $\text{SU}(3)$ flavour symmetry between three quark flavours, as shown in Figure (((TODO: Add figure))). These flavours were later denoted the up (u), down (d), and strange (s) quarks, and three more (charm, beauty, and top) were eventually found. Hadrons were classified into two groups --- mesons, which are bosonic bound states consisting of two quarks, and baryons, which are fermions consisting of three. The experimental reality of these quarks outside of phenomenology was confirmed by deep inelastic scattering experiments, which showed pointlike constitutents within the proton, called partons.
+
+It was later found that these partons come in two types --- the spin $\frac{1}{2}$ quark, and the spin 1 gluon. The existence of the gluon was confirmed in the JADE experiment, which was notably one of the first uses of Monte Carlo event generators in the analysis of experimental data. In addition to their electromagnetic charge, quarks and gluons also carry colour charge, which has three components labelled red, green, and blue (with cyan, magenta, and yellow as their anticolour opposites).
+
+In the 1970s, a formal theory of QCD based on a $\text{SU}(3)$ gauge symmetry was developed, and by 1980, the Standard Model was formalised, which unified the electromagnetic, weak, and strong forces into a single unified gauge theory with three generations of fermions (6 quarks and 6 leptons). Collider experiments throughout the following years continued to confirm predictions of the Standard Model, and it has since become our most successful and fundamental model of physical reality.
+
+A full theoretical description of QFT and QCD is outside the scope of this review, and we will only provide a brief summary in order to establish the necessary theoretical background. The reader is directed to the textbook by Peskin and Schroeder for a general overview of quantum field theory, or the textbook by Ellis, Stirling, and Webber for closer detail on quantum chromodynamics or collider physics.
+
+Quantum field theories model particles as excitations of underlying quantised fields, which are operator-valued at every point in space and time. Particles interact via the exchange of bosons as virtual particles, and in this way the concept of a ``force'' is reduced to an allowed interaction between particles. As in quantum mechanics, these particles can be more or less localised in coordinate or momentum space, with these two uncertainties linked by Heisenberg's relation
+\begin{equation}
+  \Delta x \Delta p_x \geq \frac{\hbar}{2}.
+\end{equation}
+Typically, in particle physics, particles are described as entirely delocalised plane waves with precisely defined energies and momenta. This is justified because the length scales involved in particle collisions are much smaller than typical De Broglie wavelengths, and in this limit the physical extent of the particle's wave packet is not relevant.
+
+The physical laws governing these quantised fields are captured in the Lagrangian, and can be derived via the Euler-Lagrange equations. In a gauge theory, these Lagrangians are derived to obey underlying local gauge symmetries. QCD is based on a local $\text{SU}(3)$ gauge symmetry, which implies that the wavefunction must carry three additional degrees of freedom representing the colour charge. The three fundamental colour states corresponding to red, green, and blue are
+\begin{equation}
+  r = \begin{pmatrix}1\\0\\0\end{pmatrix}, \quad g = \begin{pmatrix}0\\1\\0\end{pmatrix}, \quad \text{and} \quad b = \begin{pmatrix}0\\0\\1\end{pmatrix}.
+\end{equation}
+A local $\text{SU}(3)$ gauge transformation is a rotation of states in colour space, where the axis and amount of rotation can vary throughout time and space. The Noether invariant corresponding to this symmetry is colour charge, which is a conseved quantity in QCD.
+
+In QCD, the strong interaction is mediated by the eight gluons, corresponding to the eight generators of the $\text{SU}(3)$ group. Unlike quarks, gluons carry a combination of colour charge and anticharge. Since quarks are the only fermions that carry colour charge in the Standard Model, only quarks can couple to gluons. The Lagrangian density describing QCD is given by
+\begin{equation}
+  \mathcal{L} = \bar{\psi}_q^i (i \gamma^\mu) (D_\mu)_{ij} \psi_q^j - m_q \bar{\psi}^i_q \psi_{qi} - \frac{1}{4} F_{\mu\nu}^\alpha F^{\alpha\mu\nu}.
+\end{equation}
+Here, the first term describes the kinetic energy of quarks and their interaction with gluons, the second term endows quarks with their mass, and the third term allows for gluon-gluon interactions. Figure (((TODO: Add figure))) shows how colour flows through a quark-gluon Feynman interaction vertex. Because the generators of $\text{SU}(3)$ do not commute, QCD is a non-Abelian gauge theory and therefore gluon-gluon interations are also possible. This is in contrast to quantum electrodynamics, where there is no photon-photon coupling term in the Lagrangian.
+
+An important property of QCD is confinement. The quarks and gluons that make up hadrons have never been observed on their own as free particles. In nature, they seem to always be confined to hadronic bound states, and cannot be separated beyond the typical hadron size of $\sim \qty{1}{\femto\meter}$. Confinement has not been mathematically proven---indeed, its proof is one of the Millenium Prize Problems (a consequence of the Yang-Mills existence and mass gap). However, it can still be understood as a consequence of the running coupling of QCD. Figure (((TODO: Include figure))) shows how the coupling constant (describing the strength of the strong interaction) decreases with the energy scale of the interaction. As such, at short distances (and high energies) the strong interaction is weak, but at longer distance the strong interaction becomes strong enough to forbid the separation of quarks and gluons. This phenomenon is known as asymptotic freedom.
+
+The strong potential between quarks and antiquarks is given by the Cornell potential,
+\begin{equation}
+  V(r) = -\frac{4}{3} \frac{\alpha_s}{r} + \kappa r,
+\end{equation}
+which combines a short-distance Coloumb potential with a stronger, longer-distance linear potential, as shown in Figure (((TODO: Add figure))). Here, $\alpha_s$ is the strong coupling constant, and $\kappa$ is a constant measured to be approximately \qty{1}{\giga\electronvolt\per\femto\meter}. Because QCD allows for gluon-gluon interactions, the linear potential can be understood as a result of the self-attraction of strong field lines, which compresses the field into a flux tube with constant tension. It is this linear potential that gives rise to the confinement distance of approximately \qty{1}{\femto\meter}, at which it is energetically favourable for the strong field to break into a new quark-antiquark pair, forming a new hadron. This ``string-breaking'' model of hadron formation is the basis for the Lund string model, described further in section \hyperref[sec:lsm]{2.3}.
 
 \section{Monte Carlo Event Generators and PYTHIA}
 \begin{enumerate}
@@ -170,7 +208,7 @@ The actual implementation of string fragmentation in PYTHIA is given by the high
 \item Figure: dN/dy distributions in PYTHIA 8.3 vs 8.0 vs 6, for varying string lengths.
 \item Explain how bad the problem is with rapidity distributions. Also mention the tune loading bug.
 \item Explain why this happens in terms of the stopMass parameter, rapidity spacing, and fragmentation functions, as well as the non-uniformity of the joining step rank.
-\item Figure: W_rem plots for the joining step across different versions, as well as rapidity spacing plots.
+\item Figure: $W_\text{rem}$ plots for the joining step across different versions, as well as rapidity spacing plots.
 \item Data: Example ratio differences and SSE of hadronic chemistry in the joining step, PYTHIA 6 vs 8.
 \item Explain the bias introduced by the finalTwo failure rate and how this leads to an anomalous hadronic chemistry.
 \end{enumerate}
