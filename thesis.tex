@@ -1,6 +1,7 @@
 \documentclass[12pt,a4paper]{report}
 
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{siunitx}
 \usepackage{graphicx}
 \usepackage{caption}
@@ -9,8 +10,12 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{tikz}
+\usepackage{tikz-feynman}
 \usepackage[a4paper, margin=2.5cm]{geometry}
 \usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+
+\usetikzlibrary{positioning}
 
 \captionsetup{font=footnotesize}
 
@@ -19,7 +24,7 @@
 \begin{titlepage}
   \centering
   \vspace*{2cm}
-  {\LARGE\bfseries Restoring string fragmentation self-similiarity in PYTHIA hadronisation \par}
+  {\LARGE\bfseries A Lorentz covariant model of string fragmentation \par}
   \vspace{1.5cm}
   \Large Jade Abidi \par
   \vspace{0.5cm}
@@ -39,7 +44,7 @@
 \pagebreak
 
 \begin{abstract}
-Monte Carlo event generators like PYTHIA are used to simulate high-energy particle collision events involving non-perturbative physics. In PYTHIA, the strong field between a $q\bar{q}$ pair is modelled as a classical string with constant tension, implying that the string fragmentation process should be self-similar at all points along the string. This property is currently violated at the step where string ends are joined, causing a dip in the rapidity plateau and anomalous hadronic chemistry. We introduce an additional tunable parameter and a new algorithm for string fragmentation that improve or resolve these issues, albeit with some limitations.
+Monte Carlo event generators are extensively used to simulate high-energy particle-collision events. For analytically intractable aspects, they rely on phenomenological models. The so-called Lund model describes the non-perturbative hadronisation process as the fragmentation of a classical string with constant tension. Lorentz covariance then implies the self-similarity of this fragmentation process along the string. The current formulaion of the Lund model, used in the PYTHIA generator, violates this property in terms of both kinematic distributions and hadronic chemistry. We introduce an additional tunable parameter and a new algorithm for string fragmentation that improve or resolve these issues, albeit with some limitations.
 \end{abstract}
 
 \pagebreak
@@ -47,19 +52,19 @@ Monte Carlo event generators like PYTHIA are used to simulate high-energy partic
 \tableofcontents
 
 \chapter{Introduction}
-The field of particle physics is dedicated to investigating the most fundamental particles and interactions in nature. It naturally evolved from nuclear and atomic physics in the early 20th century as technological and scientific knowledge allowed scientists to probe matter at higher energies and smaller length scales \cite{navas_review_2024,gross_50_2023}. The physical theory underpinning particle physics developed out of quantum field theory, culminating in the Standard Model of particle physics which was formalised in the 1980s. The Standard Model unifies three of the four fundamental forces of nature (electromagnetism, the weak force, and the strong force) into a single theory, and predicted the existence of the Higgs boson well before its historic discovery at the Large Hadron Collider (LHC) in 2012 \cite{schwartz_quantum_2014,atlas_observation_2012}.
+The field of particle physics investigates the most fundamental particles and interactions in nature. It naturally evolved from nuclear and atomic physics in the early 20th century as technological and scientific knowledge allowed scientists to probe matter at higher energies and smaller length scales \cite{navas_review_2024,gross_50_2023}. The physical theory underpinning particle physics developed out of quantum field theory, culminating in the Standard Model of particle physics which was formalised in the 1980s. The Standard Model unifies three of the four fundamental forces of nature (electromagnetism, the weak force, and the strong force) into a single theory, and predicted the existence of the Higgs boson well before its historic discovery at the Large Hadron Collider (LHC) in 2012 \cite{schwartz_quantum_2014,atlas_observation_2012}.
 
-The interactions investigated in particle physics experiments occur at high energies, with low probabilities. Particle colliders, such as the LHC, are designed specifically for these experiments. Such colliders accelerate charged particles, usually electrons or protons, to speeds up to 99.99999\% of the speed of light. Most modern particle colliders are circular, and use high voltages and strong magnetic fields to accelerate particles and keep them within a thin beamline. These beamlines are then made to collide millions of times every second at interaction points, around which bespoke detector systems are able to collect data on the final state \cite{navas_review_2024, evans_lhc_2008, ellis_qcd_1996}.
+The interactions investigated in particle-physics experiments occur at high energies, with low probabilities. Particle colliders, such as the LHC, are designed specifically to enable such experiments by accelerating charged particles, usually electrons or protons (and their antiparticles), to speeds up to 99.99999\% of the speed of light. Most modern particle colliders are circular, and use high voltages and strong magnetic fields to accelerate particles and keep them within a thin beamline. The particle beams are then made to collide millions of times every second at interaction points, around which bespoke detector systems collect data on the final state \cite{navas_review_2024, evans_lhc_2008, ellis_qcd_1996}.
 
-It is very useful to be able to generate ensembles of large numbers of events based on physical models and assumptions, for comparison to experimental data. Because the physics involved is so complex and often lacks an analytic solution, Monte Carlo event generators such as PYTHIA provide a way to sample the phase space efficiently \cite{navas_review_2024, Bierlich:2022pfr, Buckley:2011ms, Skands:2012ts}. Because of a property known as factorisation, the various processes that occur in a particle collision at different energy scales can be modelled independently of each other \cite{Collins:1981uw, Skands:2012ts}. The focus of this project is the process of hadronisation, in which partons (quarks and gluons) form hadronic bound states. This occurs at momentum transfer scales below the confinement energy of $\Lambda_\text{QCD} \sim \qty{200}{\mega\electronvolt}$ \cite{Skands:2012ts}.
+For comparison against this data, it is very useful to be able to generate ensembles of large numbers of events based on physical models and assumptions. Because the physics involved is so complex and often lacks an analytic solution, Monte Carlo event generators such as PYTHIA provide a way to sample the phase space efficiently \cite{navas_review_2024, Bierlich:2022pfr, Buckley:2011ms, Skands:2012ts}. Powerful factorisation theorems allow for the various processes that occur at different energy scales to be modelled independently of each other, which greatly simplifies the problem \cite{Collins:1981uw, Skands:2012ts}. The focus of this project is the process of hadronisation, in which partons (quarks and gluons) form hadronic bound states. This occurs at momentum transfer scales below the confinement energy of $\Lambda_\text{QCD} \sim \qty{0.2}{\giga\electronvolt}$ \cite{Skands:2012ts}.
 
 Due to asymptotic freedom, the coupling constant of the strong force becomes very large for momentum transfers in this range \cite{Gross:1973ju}, and therefore the physics of hadronisation cannot be calculated perturbatively. Non-perturbative quantum chromodynamics has not yet been analytically solved, and numerical methods such as lattice QCD have limitations that render them inapplicable to hadronisation \cite{Salam:2010zt}. Instead, PYTHIA uses the Lund string model as a description of hadronisation, which is a phenomenological theory (and is not derivable from first principles) \cite{Bierlich:2022pfr,Andersson:1983ia}.
 
-In the Lund string model, the strong field between a quark and antiquark is modelled as a string with constant tension $\kappa \sim \qty{0.9}{\giga\electronvolt\per\femto\meter}$, as measured in lattice QCD simulations \cite{Bali:1992ab,Skands:2012ts}. At separation distances of $\sim \qty{1}{\femto\meter}$, there is enough energy in the string for it to ``break'', forming a new quark-antiquark pair. This leaves two quark-antiquark string subsystems, which proceed to break in the same manner as the original system, giving rise to a recursive self-similar process resulting in a set of outgoing bound states of quarks \cite{Andersson:1983ia,Andersson:1997xwk,Bierlich:2022pfr,Skands:2012ts}.
+In the Lund string model, the strong field between a quark and antiquark is modelled as a string with constant tension $\kappa \sim \qty{0.9}{\giga\electronvolt}$ per femtometre, as measured in lattice QCD simulations \cite{Bali:1992ab,Skands:2012ts}. At separation distances of $\gtrsim \qty{1}{\femto\meter}$, there is enough potential energy stored in the string for it to ``break'', forming a new quark-antiquark pair. This leaves two quark-antiquark string subsystems, which proceed to break in the same manner as the original system, giving rise to a recursive self-similar process resulting in a set of outgoing bound states of quarks \cite{Andersson:1983ia,Andersson:1997xwk,Bierlich:2022pfr,Skands:2012ts}.
 
-This self-similarity of the fragmentation process along the string is one of the most important properties of the Lund string model. All string breaks are spacelike separated and hence cannot causally influence each other, and the tension along the string is constant. It therefore follows that, neglecting the endpoints of the string, all fragmentation observables (like the number or species of hadrons produced from a region of the string) must be invariant under Lorentz boosts (or equivalently, rapidity translations) along the string axis. This means that distributions such as hadron density per unit rapidity should be flat except for endpoint effects (denoted the ``rapidity plateau''). It also implies that, if considered iteratively, the process by which each string subsystem is fragmented must be scale invariant \cite{Andersson:1983ia,Andersson:1997xwk,Bierlich:2022pfr}.
+This self-similarity of the fragmentation process along the string is one of the most important properties of the Lund string model. The string breaks are all spacelike separated and hence cannot causally influence each other, and the tension along the string is constant and invariant under longitudinal boosts. It therefore follows that, away from the endpoints of the string, all fragmentation observables (like the number or species of hadrons produced from a region of the string) must be invariant under Lorentz boosts (or equivalently, rapidity translations) along the string axis. This means that distributions such as hadron density per unit rapidity should be flat except for endpoint effects (denoted the ``rapidity plateau''). It also implies that, if considered iteratively, the process by which each string subsystem is fragmented must be scale invariant \cite{Andersson:1983ia,Andersson:1997xwk,Bierlich:2022pfr}.
 
-Despite the importance of the self-similarity of string fragmentation in the Lund model, current simulations in PYTHIA reveal that this property is quite badly broken. Since the release of PYTHIA 8.0, the rapidty plateau has exhibited a significant dip in the central region. Initial investigations revealed this to be a consequence of the hadronisation algorithm used in PYTHIA, where the final two hadrons have kinematics forced by energy-momentum conservation and the mass-shell relation. In the Monash tune of PYTHIA 8.3, the rapidity spacing between these final two hadrons is larger than the typical rapidity spacing. This, combined with the non-uniformity of location of the joining step along the string, gives rise to this central rapidity dip. Furthermore, the \texttt{finalTwo} procedure that generates these hadrons fails about 50\% of the time, introducing bias that skews the species makeup of these final two hadrons.
+Despite the importance of the Lorentz covariance of string fragmentation in the Lund model, current simulations in PYTHIA reveal that this property is quite badly broken. Since the release of PYTHIA 8.0, the rapidty plateau has exhibited a significant dip in the central region. Initial investigations revealed this to be a consequence of the hadronisation algorithm used in PYTHIA, where the final two hadrons have kinematics forced by energy-momentum conservation and the mass-shell relation. In the Monash tune of PYTHIA 8.3, the rapidity spacing between these final two hadrons is larger than the typical rapidity spacing. This, combined with the non-uniformity of location of the joining step along the string, gives rise to this central rapidity dip. Furthermore, the \texttt{finalTwo} procedure that generates these hadrons fails about 50\% of the time, introducing bias that skews the species makeup of these final two hadrons.
 
 PYTHIA offers three tunable parameters that adjust the behaviour of this procedure --- \texttt{stopMass}, \texttt{stopNewFlav}, and \texttt{stopSmear}. Prior to this project, it was believed that these parameters could be tuned to give a flat rapidity plateau, and would not need to be retuned when other fragmentation parameters change \cite{Bierlich:2022pfr,Sjostrand:2006za}. This is not the case for the Monash tune, where it is impossible to achieve a flat plateau with these parameters without significantly worsening the failure rate of \texttt{finalTwo}.
 
@@ -86,7 +91,42 @@ Before introducing PYTHIA and the Lund string model, we first provide an overvie
 
 The field of particle physics developed out of the study of atomic and nuclear physics in the early 20th century. Experiments like the discovery of the nucleus in 1911 \cite{rutherford_scattering_1911} or the neutron in 1932 \cite{chadwick_existence_1932} paved the way for the development of more advanced technologies such as particle accelerators and colliders. The high centre-of-mass energies reached in these experiments allowed for the discovery of a slew of particles in the 1950s and 1960s, dubbed the ``particle zoo'' \cite{gross_50_2023}. Alongside these experiments, the theoretical success of quantum mechanics inspired the quantisation of the electromagnetic field in the original formulation of quantum field theory (QFT) and quantum electrodynamics (QED) by Dirac, who notably predicted the existence of antimatter a number of years before its discovery \cite{dirac_quantum_1928,anderson_apparent_1932}. QED was later unified with a description of the weak force (responsible for phenomena like beta decay) into electroweak theory, a Yang-Mills gauge theory consisting of a local $\text{U}(1) \times \text{SU}(2)$ gauge symmetry \cite{navas_review_2024,thomson_modern_2013}.
 
-At the same time, quantum chromodynamics (QCD) emerged, describing the variety of particles discovered in the ``particle zoo'' as composed of more fundamental subatomic particles --- quarks and gluons. Initial models like the Eightfold Way classified these various strongly interacting particles as hadrons emerging from a $\text{SU}(3)$ flavour symmetry between three quark flavours, as shown in Figure (((TODO: Add figure))). These flavours were later denoted the up (u), down (d), and strange (s) quarks, and three more (charm, beauty, and top) were eventually found. Hadrons were classified into two groups --- mesons, which are bosonic bound states consisting of a quark and an antiquark, and baryons, which are fermions consisting of three quarks or antiquarks. The experimental reality of these quarks outside of phenomenology was confirmed by deep inelastic scattering experiments, which showed pointlike constitutents within the proton, called partons.
+\begin{figure}
+  \centering
+  \setkeys{Gin}{width=\linewidth}
+  \begin{minipage}[t]{0.49\textwidth}
+    \centering
+    \includegraphics[width=0.7\linewidth]{figures/eightfold-way.png}
+    \caption{A visual depiction of the pseudoscalar mesons in the Eightfold Way, which form an octet and a singlet in $\text{SU}(3)$ flavour space. The horizontal axis represents $I_3$, an isospin component, and the vertical axis represents $Y$, the hypercharge, both of which are quantum numbers arising from the $\text{SU}(3)$ flavour symmetry. Figure taken from \cite{thomson_modern_2013}.}
+    \label{fig:eightfold-way}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.49\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \begin{feynman}
+        \vertex (a);
+        \vertex [above=of a] (g) {g};
+        \vertex [below left=of a] (q1) {q};
+        \vertex [below right=of a] (q2) {q};
+        
+        \diagram* {
+          (q1) -- [fermion] (a) -- [fermion] (q2),
+          (a) -- [gluon] (g)
+        };
+
+        \draw[red, thick] ($(q1) + 0.15*(1cm,2cm)$) -- ($(a) + 0.15*(-0.5cm,0.6cm)$);
+        \draw[blue, thick] ($(q2) + 0.15*(-1cm,2cm)$) -- ($(a) + 0.15*(0.5cm,0.6cm)$);
+        \draw[red, thick] ($(a) + 0.15*(-0.5cm,0.6cm)$) -- ($(g) + 0.15*(-0.5cm,-2cm)$);
+        \draw[blue, thick] ($(a) + 0.15*(0.5cm,0.6cm)$) -- ($(g) + 0.15*(0.5cm,-2cm)$);
+      \end{feynman}
+    \end{tikzpicture}
+    \caption{An illustration of a $qqg$ vertex in QCD, showing the colour flow. The incoming and outgoing quarks have one colour, while the gluon has two (a colour and anticolour).}
+    \label{fig:qqg-vertex}
+  \end{minipage}
+\end{figure}
+
+At the same time, quantum chromodynamics (QCD) emerged, describing the variety of particles discovered in the ``particle zoo'' as composed of more fundamental subatomic particles --- quarks and gluons. Initial models like the Eightfold Way classified these various strongly interacting particles as hadrons emerging from a $\text{SU}(3)$ flavour symmetry between three quark flavours, as shown in Figure \ref{fig:eightfold-way}. These flavours were later denoted the up (u), down (d), and strange (s) quarks, and three more (charm, beauty, and top) were eventually found. Hadrons were classified into two groups --- mesons, which are bosonic bound states consisting of a quark and an antiquark, and baryons, which are fermions consisting of three quarks or antiquarks. The experimental reality of these quarks outside of phenomenology was confirmed by deep inelastic scattering experiments, which showed pointlike constitutents within the proton, called partons.
 
 It was later found that these partons come in two types --- the spin $\frac{1}{2}$ quark, and the spin 1 gluon. The existence of the gluon was confirmed in the JADE experiment, which was notably one of the first uses of Monte Carlo event generators in the analysis of experimental data. In addition to their electromagnetic charge, quarks and gluons also carry colour charge, which has three components labelled red, green, and blue (with cyan, magenta, and yellow as their anticolour opposites).
 
@@ -110,15 +150,27 @@ In QCD, the strong interaction is mediated by the eight gluons, corresponding to
 \begin{equation}
   \mathcal{L} = \bar{\psi}_q^i (i \gamma^\mu) (D_\mu)_{ij} \psi_q^j - m_q \bar{\psi}^i_q \psi_{qi} - \frac{1}{4} F_{\mu\nu}^\alpha F^{\alpha\mu\nu}.
 \end{equation}
-Here, the first term describes the kinetic energy of quarks and their interaction with gluons, the second term endows quarks with their mass, and the third term allows for gluon-gluon interactions. Figure (((TODO: Add figure))) shows how colour flows through a quark-gluon Feynman interaction vertex. Because the generators of $\text{SU}(3)$ do not commute, QCD is a non-Abelian gauge theory and therefore gluon-gluon interations are also possible. This is in contrast to quantum electrodynamics, where there is no photon-photon coupling term in the Lagrangian.
+Here, the first term describes the kinetic energy of quarks and their interaction with gluons, the second term endows quarks with their mass, and the third term allows for gluon-gluon interactions. Figure \ref{fig:qqg-vertex} shows how colour flows through a quark-gluon Feynman interaction vertex. Because the generators of $\text{SU}(3)$ do not commute, QCD is a non-Abelian gauge theory and therefore gluon-gluon interations are also possible. This is in contrast to quantum electrodynamics, where there is no photon-photon coupling term in the Lagrangian.
 
-An important property of QCD is confinement. The quarks and gluons that make up hadrons have never been observed on their own as free particles. In nature, they seem to always be confined to hadronic bound states, and cannot be separated beyond the typical hadron size of $\sim \qty{1}{\femto\meter}$. Confinement has not been mathematically proven---indeed, its proof is one of the Millenium Prize Problems (a consequence of the Yang-Mills existence and mass gap). However, it can still be understood as a consequence of the running coupling of QCD. Figure (((TODO: Include figure))) shows how the coupling constant (describing the strength of the strong interaction) decreases with the energy scale of the interaction. As such, at short distances (and high energies) the strong interaction is weak, but at longer distance the strong interaction becomes strong enough to forbid the separation of quarks and gluons. This phenomenon is known as asymptotic freedom.
+\begin{figure}
+  \centering
+
+\end{figure}
+
+An important property of QCD is confinement. The quarks and gluons that make up hadrons have never been observed on their own as free particles. In nature, they seem to always be confined to hadronic bound states, and cannot be separated beyond the typical hadron size of $\sim \qty{1}{\femto\meter}$. Confinement has not been mathematically proven---indeed, its proof is one of the Millenium Prize Problems (a consequence of the Yang-Mills existence and mass gap). However, it can still be understood as a consequence of the running coupling of QCD. Figure \ref{fig:running-coupling} shows how the coupling constant (describing the strength of the strong interaction) decreases with the energy scale of the interaction. As such, at short distances (and high energies) the strong interaction is weak, but at longer distance the strong interaction becomes strong enough to forbid the separation of quarks and gluons. This phenomenon is known as asymptotic freedom.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.7\linewidth]{figures/running-coupling.png}
+  \caption{The running of the QCD coupling constant $\alpha_S(Q^2)$ with respect to the energy scale $Q$. The PDG average is shown as a solid line alongside data points from numerous experiments. The asymptotic freedom of QCD is evident from how the coupling constant is sufficiently small for perturbation theory at large values of $Q$, but becomes prohibitively large for smaller values of $Q$. Figure taken from \cite{navas_review_2024}.}
+  \label{fig:running-coupling}
+\end{figure}
 
 The strong potential between quarks and antiquarks is given by the Cornell potential,
 \begin{equation}
   V(r) = -\frac{4}{3} \frac{\alpha_s}{r} + \kappa r,
 \end{equation}
-which combines a short-distance Coloumb potential with a stronger, longer-distance linear potential, as shown in Figure (((TODO: Add figure))). Here, $\alpha_s$ is the strong coupling constant, and $\kappa$ is a constant measured to be approximately \qty{1}{\giga\electronvolt\per\femto\meter}. Because QCD allows for gluon-gluon interactions, the linear potential can be understood as a result of the self-attraction of strong field lines, which compresses the field into a flux tube with constant tension. It is this linear potential that gives rise to the confinement distance of approximately \qty{1}{\femto\meter}, at which it is energetically favourable for the strong field to break into a new quark-antiquark pair, forming a new hadron. This ``string-breaking'' model of hadron formation is the basis for the Lund string model, described further in section \hyperref[sec:lsm]{2.3}.
+which combines a short-distance Coloumb potential with a stronger, longer-distance linear potential. Here, $\alpha_s$ is the strong coupling constant, and $\kappa$ is a constant measured to be approximately \qty{1}{\giga\electronvolt\per\femto\meter}. Figure \ref{fig:cornell-potential} shows lattice QCD calculations of the strong potential between a $q\bar{q}$ pair, exhibiting Coulombic behaviour at short distances and becoming linear for longer distances. Because QCD allows for gluon-gluon interactions, the linear potential can be understood as a result of the self-attraction of strong field lines, which compresses the field into a flux tube with constant tension. It is this linear potential that gives rise to the confinement distance of approximately \qty{1}{\femto\meter}, at which it is energetically favourable for the strong field to break into a new quark-antiquark pair, forming a new hadron. This ``string-breaking'' model of hadron formation is the basis for the Lund string model, described further in section \hyperref[sec:lsm]{2.3}.
 
 As mentioned earlier, experiments in particle physics require very high centre-of-mass energies for the interactions under observation to be kinematically allowed. If two particle beams have energies $E_1$ and $E_2$, then the resulting relativistic centre-of-mass (CM) energy is given by
 \begin{equation}
