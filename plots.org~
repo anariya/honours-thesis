@@ -1,0 +1,10 @@
+* Required plots and data
+** TODO dN/dy for 200 GeV string across PYTHIA 8.3, 8.1, and 6.4
+*** Label years and tunes
+** TODO dN/dy for 25 GeV, 50 GeV, 100 GeV, 200 GeV strings with default settings
+** TODO dpT/dy for 25, 50, 100, 200 GeV strings with default settings
+** TODO Hadrochemistry ratios for 200 GeV string
+** TODO finalTwo failure rate for 200 GeV string
+** TODO dN/dy for stopMass = 0.2, 0.4, 1.0, 2.0
+** TODO W_rem for stopMass = 0.2, 0.4, 1.0, 2.0
+** TODO dy for stopMass = 0.2, 0.8, 1.0, 2.0 

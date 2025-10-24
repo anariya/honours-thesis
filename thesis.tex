@@ -259,7 +259,32 @@ where $\kappa \sim \qty{1}{\giga\electronvolt\per\femto\meter}$ is the string te
 
 At a high level, the process of hadronisation in the Lund model is illustrated in Figure \ref{fig:lund-hadronisation}. First, a $q\bar{q}$ pair is created in a particle collision, and a string forms between them. At a sufficient separation distance, the string has enough energy to break, forming a new $q\bar{q}$ pair. There are now two $q\bar{q}$ pairs, each separated by a string, each of which will continue to fragment in a self-similar manner until there is no longer enough energy for further string breaks to occur. At this point, the final state consists of a number of outgoing string pieces in the two jet directions, which are the outgoing hadrons.
 
-In the Lund model, mesons are described as ``yo-yo modes'', which consist of a quark and an antiquark connected by a string and oscillating back and forth, as depicted in Figure XX. Baryons, which consist of three quarks or three antiquarks, are also modelled as yo-yo modes where one of the string endpoints is a diquark (a grouping of two quarks or antiquarks). 
+In the Lund model, mesons are described as ``yo-yo modes'', which consist of a quark and an antiquark connected by a string and oscillating back and forth, as depicted in Figure XX. Baryons, which consist of three quarks or three antiquarks, are also modelled as yo-yo modes where one of the string endpoints is a diquark (a grouping of two quarks or antiquarks).
+
+String breaking in the Lund model is modelled analogously to the Schwinger mechanism of quantum electrodynamics, where the tunnelling probability of forming a quark-antiquark pair of mass $m_q$ and transverse momentum $p_{\perp,q}$ is given by
+\begin{align}\label{eq:schwinger-mechanism}
+  \text{Pr}(m_q, p_{\perp,q}) &\propto \exp\Bigr(\frac{-\pi m_q^2}{\kappa}\Bigr) \exp\Bigr(\frac{-\pi p_{\perp,q}^2}{\kappa}\Bigr) \nonumber \\
+  &= \exp \Bigr(\frac{-\pi m_{\perp,q}^2}{\kappa}\Bigr).
+\end{align}
+
+Here, $m_{\perp,q}$ is defined as the transverse momentum of the quark, where $m_{\perp,q}^2 = m_q^2 + p_{\perp,q}^2$. There is therefore a Gaussian suppression of string breaks in both transverse momentum and quark mass. Practically, PYTHIA implements the mass suppression factor using quark-specific probabilities that are tunable parameters, rather than using the Gaussian selection here, but the probabilities are approximately similar.
+
+Equation \eqref{eq:schwinger-mechanism} governs the flavour and transverse momentum selection of the quarks created in string breaks in the Lund model, which in turn determines the species and transverse momentum distributions of hadrons produced along the string in hadronisation. Before describing the longitudinal momentum selection process, we must first introduce the longitudinal lightcone coordinates and rapidity variable. In position space, the lightcone coordinates are defined as
+\begin{equation}
+  z^\pm = z \pm t,
+\end{equation}
+where $x^+$ describes the position of a particle along the positive worldline and $x^_$ describes the position of a particle along the negative worldline. In momentum space, lightcone coordinates are defined as
+\begin{equation}\label{eq:lightcone-momentum}
+  p_z^\pm = E \pm p_z,
+\end{equation}
+where $p_z$ is the momentum in the longitudinal direction. Finally, rapidity is defined (in the longitudinal direction) as
+\begin{align}
+  y &= \frac{1}{2} \ln \Bigr( \frac{1+v}{1-v}\Bigr)  \\
+    &= \frac{1}{2} \ln \Bigr( \frac{E + p_z}{E - p_z} \Bigr) \\
+  &= \frac{1}{2} \ln \Bigr(\frac{p^+}{p^-}\Bigr),
+\end{align}
+where $v$ is velocity and $p^\pm$ are the lightcone momenta as defined in Equation \eqref{eq:lightcone-momentum}. 
+
 
 \chapter{String Fragmentation in PYTHIA}
 \label{chap:fragmentation}
