@@ -273,14 +273,14 @@ Equation \eqref{eq:schwinger-mechanism} governs the flavour and transverse momen
 \begin{equation}
   z^\pm = z \pm t,
 \end{equation}
-where $x^+$ describes the position of a particle along the positive worldline and $x^_$ describes the position of a particle along the negative worldline. In momentum space, lightcone coordinates are defined as
+where $x^+$ describes the position of a particle along the positive worldline and $x^-$ describes the position of a particle along the negative worldline. In momentum space, lightcone coordinates are defined as
 \begin{equation}\label{eq:lightcone-momentum}
   p_z^\pm = E \pm p_z,
 \end{equation}
 where $p_z$ is the momentum in the longitudinal direction. Finally, rapidity is defined (in the longitudinal direction) as
 \begin{align}
-  y &= \frac{1}{2} \ln \Bigr( \frac{1+v}{1-v}\Bigr)  \\
-    &= \frac{1}{2} \ln \Bigr( \frac{E + p_z}{E - p_z} \Bigr) \\
+  y &= \frac{1}{2} \ln \Bigr( \frac{1+v}{1-v}\Bigr)  \nonumber \\
+    &= \frac{1}{2} \ln \Bigr( \frac{E + p_z}{E - p_z} \Bigr) \nonumber \\
   &= \frac{1}{2} \ln \Bigr(\frac{p^+}{p^-}\Bigr),
 \end{align}
 where $v$ is velocity and $p^\pm$ are the lightcone momenta as defined in Equation \eqref{eq:lightcone-momentum}. 
@@ -297,20 +297,14 @@ where $v$ is velocity and $p^\pm$ are the lightcone momenta as defined in Equati
   
 \end{enumerate}
 
-Having established the theoretical basis of the Lund string model for hadronisation, we can now describe how the hadronisation process is algorithmically implemented in PYTHIA. We begin by outlining what a ``successful'' implementation of the Lund string model would achieve. As mentioned in section \hyperref[sec:lsm]{2.3}, the 1+1-dimensional kinematics (((TODO: Maybe rephrase this?))) of string fragmentation in a single event that produces $N$ hadrons are completely specified by a set of $N$ absolute lightcone momentum fractions $\{ z_{\text{abs},i}^+ \}$, where we are considering fragmentation right-to-left (but could just as well consider it left-to-right).
+Having established how the Lund string model describes hadronisation, we can now proceed to a description of how this model is implemented in the PYTHIA event generator. Actual events involve many hundreds of outgoing partons from the parton shower, and these will combine into various string topologies. For the purposes of this project, we will focus solely on the fragmentation of a $q\bar{q}$ string into a number of outgoing primary hadrons, prior to decays, and without any gluon kinks, loops, or junctions. As we will see, Lorentz invariance is entirely violated in PYTHIA even in this minimal situation. Algorithm \ref{alg:default} shows the algorithm used in PYTHIA for $q\bar{q}$ hadronisation --- this and the following section will explain this algorithm in further detail.
 
-To conserve energy and momentum, these lightcone momentum fractions must add to unity, that is,
-\begin{equation}
-  \sum_{i=1}^N z_{\text{abs},i}^+ = 1.
-\end{equation}
+In the Lund model, the Schwinger mechanism describes the relative probabilities of quark flavours in a string breakup. In turn, the probabilities of forming the various possible hadrons from a combination of quarks and antiquarks are theoretically dependent only on the various mixings of quark states that comprise the hadrons. In PYTHIA, these probabilities are implemented as tunable parameters, but the overall process is the same. Also described by the Schwinger mechanism is the transverse momenta of the quarks formed in string breakups, and therefore the transverse momenta of all final-state hadrons.
 
-The area law and lightcone scaling properties of the Lund string model require that the relative lightcone momentum fractions $\{ z_i^+ \}$ of a single event (as defined in section \hyperref[sec:lsm]{2.3}) are all drawn from a given fragmentation function $f(z)$ --- specifically, the Lund symmetric fragmentation function specified in equation (((insert equation here))).
+The Lund model describes the selection of hadron longitudinal momenta in terms of an iterative left-right (or right-left) ordering of string breakups, and the fragmentation function $f(z)$. This model is derived from the causal independence of breakup vertices and the resulting Lorentz covariance and self-similarity of the string fragmentation. It is important to note, however, that the Lund model provides no description of how energy and momentum are globally conserved in string fragmentation. If string fragmentation is considered iteratively, there will eventually come a point where there is insufficient energy left in the string to create a hadron with the required mass. PYTHIA enforces energy conservation by halting the string fragmentation when the remaining string energy is below a certain value (with some smearing), and then creating two final hadrons. Energy-momentum conservation and the on-shell condition fix the kinematics of these final two hadrons entirely. In the event where there is insufficient energy to create these two hadrons, the event is thrown out and string fragmentation is restarted.
 
-Also established in section \hyperref[sec:lsm]{2.3} is the fact that the quarks produced along the string must have masses $m_q$ and transverse momenta $p_{\perp,q}$ drawn from a distribution $\text{Pr}(m_q^2, p_{\perp,q}^2)$ with a Gaussian suppression, as in equation (((insert equation here))). The resulting hadrons formed from these quarks (and antiquarks) must have masses and transverse momenta distributed accordingly.
+This implementation of energy conservation manifestly breaks Lorentz covariance. The manner in which the kinematics of these final two hadrons are determined is different from the rest of the hadrons along the string. Furthermore, refragmenting the entire string when it is not possible to create the final two hadrons introduces bias in the species makeup of these final two. This is in contradiction with the expectation that the string fragmentation process should be self-similar along the string. The PYTHIA documentation (and online manual, prior to updates that were part of this project) describe how this violation of Lorentz covariance is compensated for in a few ways. Firstly, instead of fragmenting left-to-right or right-to-left, hadrons are fragmented from either end with equal probability, in order to smear the position of the joining step uniformly along the string. Secondly, the parameters that control when string fragmentation is stopped are carefully chosen in order to give a flat rapidity plateau \cite{Bierlich:2022pfr,Sjostrand:2006za}. It was thought that the dependence of these final two stopping parameters on the rest of the fragmentation parameters (such as the Lund $a$ and $b$ parameters, or the quark and hadron probabilities) was minimal, and that as such these parameters would not need to be adjusted between different PYTHIA tunes \cite{PYTHIAmanualold}. As we will see, none of these statements are true.
 
-(((TODO: Is this a good description? Is this necessary? What about the distribution of $N$?)))
-
-The actual implementation of string fragmentation in PYTHIA is given by the high-level pseudocode in (((link))). Here, we are considering the simplest fragmentation process where a quark $q_0$ and antiquark $\bar{q}_0$ move in opposite directions along the $z$-axis with centre-of-mass energy $E_\text{CM}$. An actual event in PYTHIA will contain many such processes between different partons produced in the parton shower, and will also require the consideration of gluon kinks along the strings. (((TODO, elaborate, make less vague))) However, as we will see, lightcone scaling is entirely violated in PYTHIA even in this minimal situation, and as such the rest of this thesis will be limited to simple $q \bar{q}$ hadronisation.
 
 \begin{algorithm}
   \caption{The default PYTHIA 8.3 algorithm for $q\bar{q}$ hadronisation} \label{alg:default}
@@ -349,6 +343,8 @@ The actual implementation of string fragmentation in PYTHIA is given by the high
 \item Explain the stopMass, stopNewFlav, and stopSmear parameters work.
 \item Note the inherent violation of lightcone scaling. Explain how the manual and documentation claim this is resolved.
 \end{enumerate}
+
+Before showing how 
 
 \section{Performance of the Current finalTwo Procedure}
 \begin{enumerate}
