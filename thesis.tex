@@ -413,7 +413,7 @@ The fragmentation algorithm used in PYTHIA 8.316 manifestly violates Lorentz cov
 
 A simple picture of the Lorentz covariance of the kinematics of hadrons along the string can be obtained from the shape of the rapidity plateau. Figure (((REF))) shows the rapidity plateaus ($dN/dy$ distributions) for $d\bar{d}$ hadronisation across PYTHIA 6.4XX (which uses the JETSET tune), PYTHIA 8.1XX (which uses the Hoeth tune), and PYTHIA 8.315 (which uses the JETSET tune) \footnote{PYTHIA 8.315 is used here rather than PYTHIA 8.316 because the change to \texttt{stopMass} in PYTHIA 8.316 provides a small improvement in the flatness of the rapidity plateau.}. These results are for a rather long \qty{200}{\giga\electronvolt} string, for which a very flat central region would be expected in the rapidity plateau. Indeed, the plateau in PYTHIA 6.4XX is entirely flat in the middle, with the ``ears'' on either side explainable by endpoint effects, since Lorentz covariance only applies away from the endpoints.
 
-On the other hand, the plateaus for both PYTHIA 8 versions show a significant dip in the middle (((DO I NEED TO QUANTIFY))). To factor out effects of different PYTHIA versions being coded differently, Figure (((REF))) shows the same rapidity plateaus for these three tunes, all within PYTHIA 8.315. Notably, the plateau for the JETSET tune is not as flat. This is a result of a bug in how hadron kinematics are calculated in PYTHIA 8 (introduced when PYTHIA was ported to C++ from PYTHIA 6, which uses FORTRAN) \cite{steve}. It is, however, mostly flat, and there is still a much larger dip for the Hoeth and Monash tunes. Figure (((REF))) shows how the rapidity plateau for the Monash tune varies across $20, 50, 100,\text{ and } \qty{200}{\giga\electronvolt}$ strings.
+On the other hand, the plateaus for both PYTHIA 8 versions show a significant dip in the middle (((DO I NEED TO QUANTIFY))). To factor out effects of different PYTHIA versions being coded differently, Figure (((REF))) shows the same rapidity plateaus for these three tunes, all within PYTHIA 8.315. Notably, the plateau for the JETSET tune is not as flat. This is a result of a bug in how hadron kinematics are calculated in PYTHIA 8 \footnote{This bug was introduced when PYTHIA was ported to C++ from FORTRAN, between versions 6 and 8. It was discovered by Stephen Mrenna a few weeks before this thesis was submitted \cite{steve}, and there was not enough time in this project to properly investigate the implications.} \cite{steve}. It is, however, mostly flat, and there is still a much larger dip for the Hoeth and Monash tunes. Figure (((REF))) shows how the rapidity plateau for the Monash tune varies across $20, 50, 100,\text{ and } \qty{200}{\giga\electronvolt}$ strings.
 
 The presence of this dip in the rapidity plateaus of the Monash and Hoeth tunes exposes the violation of Lorentz covariance in the PYTHIA string fragmentation algorithm, and disproves the assertion that the values of the final two parameters (\texttt{stopMass}, \texttt{stopNewFlav}, and \texttt{stopSmear}) do not need to be adjusted between tunes. As mentioned earlier, \texttt{stopMass} was changed from 0.8 to 1.0 in the move from FORTRAN to C++. The rapidity plateau for a \texttt{stopMass} of 0.8 in the Monash tune is also shown in Figure (((REF))), and this change is evidently not enough to explain the violation of Lorentz covariance.
 
@@ -448,13 +448,33 @@ As a whole, the violation of Lorentz covariance in PYTHIA hadronisation is quite
 \item Data: Rapidity plateaus, SSEs of rapidity plateaus and hadronic chemistry across different joining step parameters and tunes.
 \item Figure: Plots of SSEs across parameters and tunes.
 \end{enumerate}
+Having established the extent and causes of the breaking of Lorentz covariance in PYTHIA hadronisation, we can now move on to exploring solutions to this problem. It would be easiest if we could at the very least tune for a flat rapidity plateau (and ideally restore Lorentz covariance) using the three parameters that control when the final two hadrons are created --- \texttt{stopMass}, \texttt{stopNewFlav}, and \texttt{stopSmear}. Figure (((REF))) shows that, in the Monash tune, a flat rapidity plateau can be obtained by decreasing \texttt{stopMass} to approximately (((VALUE))), and that the deviation in $\Delta y$ increases linearly with \texttt{stopMass}. Figure (((REF))) shows the rapidity plateau for \qty{200}{\giga\electronvolt} $d\bar{d}$ hadronisation for varying values of \texttt{stopMass}, and the effect on the flatness is clear, with a sweet spot shown at the value of (((VALUE))) where the $\Delta y$ means are equal across final and regular hadrons.
 
-\section{The probRevertBreak parameter}
+The issue with simply turning down \texttt{stopMass} (or reducing $W_\text{min}$ in general) is that the bias towards lighter hadrons in the final two hadrochemistry is significantly increased for smaller $W_\text{min}$, and in the extreme case of $\texttt{stopMass} = 0.05$ failures are common enough to cause noticeable slowdowns and pions make up (((VALUE)))\% of all final hadrons. Figure (((REF))) shows how the hadrochemistry SSE varies with \texttt{stopMass} --- worse, there is no value that brings it close to zero.
+
+Similar to \texttt{stopMass}, \texttt{stopNewFlav} affects the mean of $W_\text{min}$, but with a more favourable effect on hadronic chemistry since this parameter accounts somewhat for the mass of the final hadrons that will be produced in its effect on $W_\text{min}$. Figure (((REF))) shows how the hadrochemistry SSE varies with \texttt{stopNewFlav}. (((COMMENT))).
+
+Since \texttt{stopSmear} primarly affects the spread of $W_\text{min}$, its main utility is in aligning the shape of the $\Delta y$ distribution between the final and regular hadrons. Figure (((REF))) shows, however, how these distributions are inherently shaped differently beyond just a dilation. Through experimentation, it was found that the values (((VALUES))) give a good improvement on the flatness of the rapidity plateau without a significant worsening of hadrochemistry SSE, as well in Figure (((REF))) which compares the resulting rapidity plateau and SSE with the PYTHIA 8.316 defaults. 
+
+In general, for the Monash tune, and a wide range of potential tunes, there is no way to restore Lorentz covariance using the existing \texttt{finalTwo} parameters in PYTHIA. Even a flat rapidity plateau cannot be obtained without extreme violations in Lorentz covariance of hadrochemistry along the string. Fundamentally, the issue is that there is only one degree of freedom --- the mean of $W_\text{min}$ and hence $\Delta y$ --- with which to adjust for a flat rapidity plateau. Increasing the mean improves the hadronic chemistry but worsens the dip in the rapidity plateau, and vice versa.
+
+The next section describes a new parameter, \texttt{probRevertFinal}, which provides some additional freedom in parameter space to adjust for Lorentz covariance.
+
+\section{The probRevertFinal parameter}
 \begin{enumerate}
-\item Introduce the probRevertBreak parameter and the pseudocode. Explain how the algorithm works and what is changed. Include formulas for conditional spin switching.
+\item Introduce the probRevertFinal parameter and the pseudocode. Explain how the algorithm works and what is changed. Include formulas for conditional spin switching.
 \item Explain how the probRevertBreak parameter reduces bias and improves hadronic chemistry, as well as providing more freedom to tune the joining step.
 \item Show results (SSEs and rapidity plateaus) of probRevertBreak and the possibility for improvement.
 \end{enumerate}
+The next option for restoring Lorentz covariance would ideally provide a way to improve hadrochemistry without a significant affect on the rapidity plateau. One way to do this is to reduce the bias in the final two hadrochemistry when there is insufficient energy to create the final two hadrons. By default, PYTHIA refragments the entire string in this case. Instead of refragmenting from the start, we could instead undo the previous string break from the end we are fragmenting from, and then try to create the final two hadrons again. The parameter \texttt{probRevertFinal} was implemented in PYTHIA 8.316, which gives a probability that the final string break will be reverted when \texttt{finalTwo} fails because of insufficient string mass. Algorithm (((REF))) shows how the \textsc{Fragment} procedure is adjusted to implement this parameter --- changes are highlighted in red, and some lines are collapsed for brevity.
+
+When one of the final hadrons is reselected from its new constitutent flavours after the string break is reverted, the selection between a light and heavy (pseudoscalar vs. scalar, or vector vs. axial vector) hadron spin is flipped with a probability $\Pr(\text{flip})$, given by
+\begin{equation}
+  Pr(\text{flip}) = \frac{Pr(\text{current heavy spin} | \text{current flavour})}{\Pr(\text{previous heavy spin} | \text{previous flavour})}.
+\end{equation}
+Figure (((REF))) illustrates how this equation has the effect of (as much as possible) ensuring the ``same'' random number is used to select both spins. Algorithm (((REF))) has high level pseudocode of the \textsc{CombineConditional} procedure which takes in the old flavour and spin and selects a hadron species accordingly.
+
+Figure (((REF))) shows how the rapidity plateau and hadrochemistry SSE vary as \texttt{probRevertFinal} varies from 0 to 1. As expected, increasing \texttt{probRevertFinal} decreases the SSE, and while there is some worsening of the rapidity plateau (since reverting the final break on average increases the energy available for the final two), the effect is quite mild. Through experimentation with all four parameters, the combination (((VALUES))) was found to give a good improvement in the rapidity plateau with a lessened effect on SSE compared to the same values with $\texttt{probRevertFinal = 0}$, as shown in Figure (((REF))). 
 
 \section{Limitations}
 \begin{enumerate}
@@ -462,16 +482,27 @@ As a whole, the violation of Lorentz covariance in PYTHIA hadronisation is quite
 \item Re-emphasise how issues like anomalous hadronic chemistry and the rapidity plateau are not fixed.
 \item Note the issues with finalTwo failing. Cite a few papers that are affected by this.
 \end{enumerate}
+The \texttt{probRevertFinal} parameter successfully provides more parameter space and allows for Lorentz covariance to be restored further. However, the rapidity plateau in Figure (((REF))) is not as flat as that of the JETSET tune in Figure (((REF))), and the hadrochemistry SSE is enough for noticeable distortions in particle spectra across the string. The shape of the $\Delta y$ distribution is also different between regular and final hadrons. Finally, the manifest breaking of Lorentz covariance in the structure of the algorithm means that restoring Lorentz covariance by obtaining a flat rapidity plateau and a negligible hadrochemistry SSE is impossible without using a different model to conserve energy in string fragmentation.
 
-\chapter{The Accordion Algorithm for String Fragmentation}
+One might assume the thesis would end here by describing the impact of this research and the possibilities for further investigations. The attuned reader, though, would realise that this feels like a narratively unsatisfying ending to the paper. The reader can rest assured that the humble author is goated. In the next section, we describe a new model of string fragmentation that enforces energy conservation in a Lorentz covariant way, restoring Lorentz covariance to the PYTHIA hadronisation algorithm.
+
+\chapter{The Slinky Model of String Fragmentation}
 \label{chap:accordion}
-\section{The Accordion Algorithm}
-\begin{enumerate}
-\item Motivate the concept behind the accordion algorithm. Re-emphasise the self-similarity and causal independence of breakup vertices.
-\item Establish the goals of the algorithm - a flat rapidity plateau, correct hadronic chemistry, and a lower failure rate.
-\item Explain how the algorithm works. Derive equations relating rapidity spacing and z fractions. Explain the accordion rescaling and why numerical solution is required.
-\item Elaborate on limitations of the accordion rescaling, including the shaky Lorentz covariance and effect on fragmentation functions. Explain why fragmentation functions may not matter.
-\end{enumerate}
+\section{The Slinky Model}
+To motivate this new model, it is useful to take a step back to the basics of the Lund model --- what properties we expect string fragmentation to have, what these say about how the algorithm can be structured, and the nature of the actual physical process of hadronsation. The Lund model describes $q\bar{q}$ string fragmentation in terms of causally independent string breaks via the Schwinger mechanism on a string worldsheet. This property combined with the possibility of considering string breaking iteratively and left-right symmetry imply the form of the Lund symmetric fragmentation function in Equation \eqref{eq:schwinger-mechanism}. In the limit where the remaining string mass is infinite, the longitudinal momenta (or the Lorentz invariant rapidity spacings) of hadrons can be selected according to this fragmentation function, and this provides a Lorentz covariant fragmentation.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.4\linewidth]{figures/slinky.png}
+  \caption{Slinky.}
+  \label{fig:slinky}
+\end{figure}
+
+More fundamentally, hadronisation is the evolution of an incoming partonic $q\bar{q}$ state into an outgoing state consisting of a set of hadrons, subject to the constraint of energy conservation and the requirement that the evolution into the final state is Lorentz covariant. Although the breakup vertices are causally independent, they are also quantum mechanically correlated in the enforcement of energy conservation. If we observe that the first rank hadron from the positive end takes the majority of the string mass, then the rest of the hadrons must have small masses or kinetic energies. As such, the effect of the energy conservation constraint on the fragmentation process should be global. A Lorentz covariant model for string fragmentation should therefore enforce energy conservation in a way that is both global and Lorentz covariant. Physically, this would correspond to the quantum entanglement of the breakup vertices, alongside their causal disconnection. As a phenomenological model, we cannot expect to accurately model quantum entangelement effects, but this at least provides a justification for the model exhibiting global behaviour. At least metaphorically, the partonic state evolves ``simultaneously'' to the final state, in the sense that while nothing that occurs at any point along the string has any causal or time-ordered influence on any other point (so any ordering is theoretically appropriate), there are also global considerations that forbid a strictly iterative model.
+
+The accordion model of string fragmentation preserves Lorentz covariance by allowing energy conservation to be violated and sampling rapidity spacings for the final two hadrons based on selections of trial $z$ fractions from fragmentation functions, so that the rapidity spacings and particle spectra are identically distributed along the string. Energy conservation is then restored by a global Lorentz covariant rapidity dilation $y \rightarrow ky$, where a solution to $k$ is obtained numerically and negligible corrections are done to ensure energy conservation is exact. Such a rapidity dilation preserves a flat rapidity plateau by stretching or shrinking all rapidity differences like a Slinky, as shown in Figure \ref{fig:slinky}. Lorentz covariance is therefore maintained in fragmentation.
+
+Figure (((REF))) shows a schematic illustration of how the default PYTHIA 8.316 string fragmentation algorithm implements hadronisation, and Figure (((REF))) shows a similar diagram for the Slinky model. 
 
 \section{Pseudocode}
 \begin{enumerate}
