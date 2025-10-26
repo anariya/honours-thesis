@@ -10,6 +10,7 @@
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
+\usepackage{algpseudocodex}
 \usepackage{tikz}
 \usepackage{tikz-feynman}
 \usepackage[a4paper, margin=2.5cm]{geometry}
@@ -307,31 +308,43 @@ This implementation of energy conservation manifestly breaks Lorentz covariance.
 
 
 \begin{algorithm}
-  \caption{The default PYTHIA 8.3 algorithm for $q\bar{q}$ hadronisation} \label{alg:default}
+  \caption{The default PYTHIA 8.315 algorithm for $q\bar{q}$ hadronisation} \label{alg:default}
   \begin{algorithmic}
-    \Procedure{Fragment}{$E_\text{CM}, flav(q_0), flav(\bar{q}_0)$}
-    \State initialise event record $event$
-    \State $i \gets 1$
-    \State $p_x(q_0) \gets 0.0$
-    \State $p_y(q_0) \gets 0.0$
-    \State $p_x(\bar{q}_0) \gets 0.0$
-    \State $p_y(\bar{q}_0) \gets 0.0$
-    \Loop
-    \State $fromPos \gets$ true or false with equal probability
-    \State $flav(q_i) \gets$ flavour according to Gaussian suppression ((equation)) and PYTHIA weights
-    \State $flav(\bar{q}_i) \gets$ antiflavour of $flav(q_i)$
-    \State $p_x(q_i) \gets$ transverse momentum according to Gaussian suppression ((equation))
-    \State $p_x(\bar{q}_i) \gets -p_x(q_i)$
-    \State $p_y(q_i) \gets$ transverse momentum according to Gaussian suppression ((equation))
-    \State $p_y(\bar{q}_i) \gets -p_y(q_i)$ \Comment {String break done.}
-    \If{fromPos}
-    \State $event[i].id \gets$ hadron selected from combination of $flav(q_{i-1}$ and $flav(\bar{q}_i)$
-    \State $event[i].m \gets$ mass selected according to Breit-Wigner distribution
-    \State $event[i].p_x \gets p_x(q_{i-1}) + p_x(\bar{q}_i)$
-    \State $event[i].p_y \gets p_y(q_{i-1}) + p_y(\bar{q}_i)$
-    \Else
-    \EndIf
-    \EndLoop
+    \Procedure{Fragment}{$E_\text{CM}, \text{flav}(q_\text{end}^+), \text{flav}(q_\text{end}^-)$}
+      \State initialise event record $event$
+      \State $p_x(q_\text{end}^+) \gets 0$
+      \State $p_y(q_\text{end}^+) \gets 0$ 
+      \State $p_x(q_\text{end}^-) \gets 0$ 
+      \State $p_y(q_\text{end}^-) \gets 0$ 
+      \State $p^+ \gets E_\text{CM}$
+      \State $p^- \gets E_\text{CM}$ 
+      \Loop
+        \State $\text{fromPos} \gets$ true or false with equal probability \Comment{$\pm$ and $\mp$ reflect this selection}
+        \State $\vec{p}_\perp(q_\text{break}^\pm) \gets$ transverse momentum selected according to \eqref{eq:schwinger-mechanism} \Comment{Select transverse momentum}
+        \State $\vec{p}_\perp(q_\text{break}^\mp) \gets -\vec{p}_\perp(q_\text{break}^\pm)$
+        \State $\vec{p}_\perp \gets \vec{p}_\perp(q_\text{end}^\pm) + \vec{p}_\perp(q_\text{break}^\pm)$
+        \State $\vec{p}_\perp(q_\text{end}^\pm) \gets \vec{p}_\perp(q_\text{break}^\mp)$
+        \Repeat \Comment{Select string break flavour and new hadron species, mass, and $z$ fraction}
+          \State $\text{flav}(q_\text{break}^\pm) \gets \textsc{flavSel}(q_\text{end}^\pm)$
+          \State $\text{flav}(q_\text{break}^\mp) \gets \text{anti}(\text{flav}(q_\text{end}^\pm))$
+          \State $\text{species} \gets \textsc{combine}(\text{flav}(q_\text{end}^\pm), \text{flav}(q_\text{break}^\pm))$
+          \State $m \gets \textsc{msel}(\text{species})$
+          \State $m_\perp \gets \sqrt{m^2 + p_x^2 + p_y^2}$
+          \State $z \gets \textsc{zfrag}(\text{flav}(q_\text{end}^\pm), \text{flav}(q_\text{break}^\pm), m_\perp)$
+          \State $\text{flav}(q_\text{end}^\pm) \gets \text{flav}(q_\text{break}^\mp)$
+        \Until {$\textsc{combine}$ succeeds}        
+        \If {$\sqrt{p^+ p^-} \leq \textsc{wmin}(q_\text{end}^+,q_\text{end}^-, q_\text{break}^+,q_\text{break}^-)$}
+          \State $\textbf{break}$
+        \EndIf      
+        \State $p^\pm_\text{hadron} \gets z p^\pm$ \Comment{Calculate longitudinal momentum}
+        \State $p^\pm \gets (1 - z) p^\pm$
+        \State $p^\mp_\text{hadron} \gets p^\pm / m_\perp^2$
+        \State $p^\mp \gets p^\mp - p^\mp_\text{hadron}$
+        \State $E \gets p^+ + p^-$
+        \State $p_{z} \gets p^+ - p^-$
+        \State $\text{append new hadron with } (\text{species}, m, \vec{p}_\perp, p_z, E) \text{ to event}$
+      \EndLoop
+      \State $\textsc{finaltwo}(\text{event}, q_\text{end}^+,q_\text{end}^-, q_\text{break}^+,q_\text{break}^-)$
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
