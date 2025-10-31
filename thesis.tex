@@ -246,7 +246,47 @@ where $\kappa \sim \qty{1}{\giga\electronvolt\per\femto\meter}$ is the string te
 
 At a high level, the process of hadronisation in the Lund model is illustrated in Figure \ref{fig:lund-hadronisation}. First, a $q\bar{q}$ pair is created in a particle collision, and a string forms between them. At a sufficient separation distance, the string has enough energy to break, forming a new $q\bar{q}$ pair. There are now two $q\bar{q}$ pairs, each separated by a string, each of which will continue to fragment in a self-similar manner until there is no longer enough energy for further string breaks to occur. At this point, the final state consists of a number of outgoing string pieces in the two jet directions, which are the outgoing hadrons.
 
-In the Lund model, mesons are described as ``yo-yo modes'', which consist of a quark and an antiquark connected by a string and oscillating back and forth, as depicted in Figure (((REF))). Baryons, which consist of three quarks or three antiquarks, are also modelled as yo-yo modes where one of the string endpoints is a diquark (a grouping of two quarks or antiquarks).
+\begin{figure}
+  \centering
+  \begin{tikzpicture}
+    \tikzset{
+      axis/.style={->, thick},
+      worldline/.style={line width=1.6pt, line cap=round},
+    }
+
+    \draw[axis] (0,0) -- (6,0) node[right] {$z$};
+    \draw[axis] (0,0) -- (0,11) node[above] {$t$};
+
+    \coordinate (S1) at (2.5,0);
+    \fill (S1) circle (1.8pt) node[below=2pt] {$S_1$};
+
+    \coordinate (A1) at (5,2.5);
+    \fill (A1) circle (1.8pt) node[right=2pt] {$A_1$};
+    \coordinate (B1) at (0,2.5);
+    \fill (B1) circle (1.8pt) node[left=2pt] {$B_1$};
+    \coordinate (S2) at (2.5,5);
+    \fill (S2) circle (1.8pt) node[below=2pt] {$S_2$};
+    \coordinate (A2) at (0,7.5);
+    \fill (A2) circle (1.8pt) node[left=2pt] {$A_2$};
+    \coordinate (B2) at (5,7.5);
+    \fill (B2) circle (1.8pt) node[right=2pt] {$B_2$};
+    \coordinate (S3) at (2.5,10);
+    \fill (S3) circle (1.8pt) node[below=2pt] {$S_3$};
+
+    \draw[worldline,red] (S1) -- (A1) -- (S2) -- (A2) -- (S3);
+    \draw[worldline,cyan] (S1) -- (B1) -- (S2) -- (B2) -- (S3);
+
+    \draw[->,red,line width=1pt] ($(S1)!0.4!(A1)$) -- ($(S1)!0.45!(A1)$);
+    \draw[->,cyan,line width=1pt] ($(S1)!0.4!(B1)$) -- ($(S1)!0.45!(B1)$);
+
+    \node[anchor=south west, red] at (4,1.1) {$q$};
+    \node[anchor=south east,cyan] at (1,1.1) {$\bar{q}$};
+  \end{tikzpicture}
+  \label{fig:yoyo-mode}
+  \caption{A spacetime diagram of the yo-yo mode of the Lund model.}
+\end{figure}
+
+In the Lund model, mesons are described as ``yo-yo modes'', which consist of a quark and an antiquark connected by a string and oscillating back and forth, as depicted in Figure \cite{fig:yoyo-mode}. Baryons, which consist of three quarks or three antiquarks, are also modelled as yo-yo modes where one of the string endpoints is a diquark (a grouping of two quarks or antiquarks).
 
 Before describing the longitudinal momentum selection process, we must first introduce the longitudinal lightcone coordinates and rapidity variable. In position space, the lightcone coordinates are defined as
 \begin{equation}
