@@ -7,10 +7,12 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{cite}
+\usepackage{color}
 \usepackage{algorithm}
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{algpseudocodex}
+\usepackage{float}
 \usepackage{tikz}
 \usepackage{tikz-feynman}
 \usepackage{svg}
@@ -20,7 +22,6 @@
 \usetikzlibrary{positioning}
 
 \captionsetup{font=footnotesize}
-
 
 \begin{document}
 
@@ -286,7 +287,7 @@ At a high level, the process of hadronisation in the Lund model is illustrated i
   \caption{A spacetime diagram of the yo-yo mode of the Lund model.}
 \end{figure}
 
-In the Lund model, mesons are described as ``yo-yo modes'', which consist of a quark and an antiquark connected by a string and oscillating back and forth, as depicted in Figure \cite{fig:yoyo-mode}. Baryons, which consist of three quarks or three antiquarks, are also modelled as yo-yo modes where one of the string endpoints is a diquark (a grouping of two quarks or antiquarks).
+In the Lund model, mesons are described as ``yo-yo modes'', which consist of a quark and an antiquark connected by a string and oscillating back and forth, as depicted in Figure \ref{fig:yoyo-mode}. Baryons, which consist of three quarks or three antiquarks, are also modelled as yo-yo modes where one of the string endpoints is a diquark (a grouping of two quarks or antiquarks).
 
 Before describing the longitudinal momentum selection process, we must first introduce the longitudinal lightcone coordinates and rapidity variable. In position space, the lightcone coordinates are defined as
 \begin{equation}
@@ -415,7 +416,7 @@ If $W_\text{rem} \leq W_\text{min}$, where $W_\text{min}$ is selected according 
     \State \Return \texttt{event}
     \EndProcedure
   \end{algorithmic}
-  \caption{The default PYTHIA 8.315 algorithm for $q\bar{q}$ hadronisation.} \label{alg:default}
+  \caption{The default PYTHIA 8.316 algorithm for $q\bar{q}$ hadronisation.} \label{alg:default}
 \end{algorithm}
 
 Not included in Algorithm \ref{alg:default} or the pseudocode above is a description of the so-called ``popcorn model'', which gives a better fit to experimental data by allowing mesons to be formed between baryons when a diquark string break occurs. The effects of this model do not affect the discussion in the rest of this thesis, but figures generated are generated with the default popcorn model settings in order to reflect the typical behaviour of PYTHIA.
@@ -547,13 +548,65 @@ In general, for the Monash tune, and a wide range of potential tunes, there is n
 The next section describes a new parameter, \texttt{probRevertFinal}, which provides some additional freedom in parameter space to adjust for Lorentz covariance.
 
 \section{The probRevertFinal parameter}
-The next option for restoring Lorentz covariance would ideally provide a way to improve hadrochemistry without a significant affect on the rapidity plateau. One way to do this is to reduce the bias in the final two hadrochemistry when there is insufficient energy to create the final two hadrons. By default, PYTHIA refragments the entire string in this case. Instead of refragmenting from the start, we could instead undo the previous string break from the end we are fragmenting from, and then try to create the final two hadrons again. The parameter \texttt{probRevertFinal} was implemented in PYTHIA 8.316, which gives a probability that the final string break will be reverted when \texttt{finalTwo} fails because of insufficient string mass. Algorithm (((REF))) shows how the \textsc{Fragment} procedure is adjusted to implement this parameter --- changes are highlighted in red, and some lines are collapsed for brevity.
+\begin{algorithm}
+  \caption{The PYTHIA 8.316 algorithm for $q\bar{q}$ hadronisation, modified to implement \texttt{probRevertFinal}}
+  \label{alg:fragment-revert}
+  \begin{algorithmic}
+    \Procedure{Fragment}{$E_\text{CM}, \text{flav}_{+\text{end}}, \text{flav}_{-\text{end}}$}
+      \Repeat
+        \State initialise event record
+        \Loop
+          \State $\text{fromPos} \gets$ true or false with equal probability \Comment{$\pm$ and $\mp$ reflect this selection}
+          \State{select transverse momenta for string break}
+          \Repeat
+            \State{select flavour for string break}
+            \State{select species and mass for new hadron}
+            \State{select $z$ fraction for new hadron}
+          \Until {\textsc{Combine} succeeds}
+          \If {$\sqrt{p^+ p^-} \leq \textsc{Wmin}(\text{flav}_{+\text{end}},\text{flav}_{-\text{end}}, \text{flav}_{+\text{break}},\text{flav}_{-\text{pbreak}})$}
+            \State $\textbf{break}$
+          \EndIf
+          \State{calculate energy and longitudinal momentum for new hadron}
+          \If{$E < 0$}
+            \State \textcolor{red}{\textbf{break}}
+          \EndIf
+          \State $\text{append new hadron with } (\text{species}, m, \vec{p}_\perp, p_z, E) \text{ to } \texttt{event}$
+      \EndLoop
+      \If {$\textsc{FinalTwo}(\texttt{event}, p^+, p^-, q_{+\text{end}},q_{-\text{end}}, \text{species}, m, \vec{p}_\perp)$ fails}
+        \State \textcolor{red}{Revert previous string break}
+        \State \textcolor{red}{Repeat \textsc{FinalTwo} with \textsc{CombineConditional}}
+      \EndIf
+    \Until {\textsc{FinalTwo} succeeds}
+    \State \Return \texttt{event}
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+The next option for restoring Lorentz covariance would ideally provide a way to improve hadrochemistry without a significant affect on the rapidity plateau. One way to do this is to reduce the bias in the final two hadrochemistry when there is insufficient energy to create the final two hadrons. By default, PYTHIA refragments the entire string in this case. Instead of refragmenting from the start, we could instead undo the previous string break from the end we are fragmenting from, and then try to create the final two hadrons again. The parameter \texttt{probRevertFinal} was implemented in PYTHIA 8.316, which gives a probability that the final string break will be reverted when \texttt{finalTwo} fails because of insufficient string mass. Algorithm \ref{alg:fragment-revert} shows how the \textsc{Fragment} procedure is adjusted to implement this parameter --- changes are highlighted in red, and some lines are collapsed for brevity.
+
+\begin{algorithm}
+  \caption{High level description of the algorithm to combine quark flavours with conditional spin flipping}
+  \label{alg:conditional-combine}
+  \begin{algorithmic}
+    \Procedure{CombineConditional}{$\text{flav}_1, \text{flav}_2, \text{flav}_\text{old}, \text{spin}_\text{old}$}
+      \State condProbPrev $\gets$ probability of selecting $\text{spin}_\text{old}$ from $\text{flav}_1$ and $\text{flav}_\text{old}$
+      \State condProbCurrent $\gets$ probability of selecting $\text{spin}_\text{old}$ from $\text{flav}_1$ and $\text{flav}_2$
+      \If {$\textsc{Random}(0, 1) > \text{condProbCurrent} / \text{condProbPrev}$}
+        \State select hadron with opposite light/heavy spin from $\text{spin}_\text{old}$
+      \Else
+        \State select hadron with same light/heavy spin as $\text{spin}_\text{old}$
+      \EndIf
+      \State \Return selected hadron
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
 
 When one of the final hadrons is reselected from its new constitutent flavours after the string break is reverted, the selection between a light and heavy (pseudoscalar vs. scalar, or vector vs. axial vector) hadron spin is flipped with a probability $\Pr(\text{flip})$, given by
 \begin{equation}
-  Pr(\text{flip}) = \frac{Pr(\text{current heavy spin} | \text{current flavour})}{\Pr(\text{previous heavy spin} | \text{previous flavour})}.
+  Pr(\text{flip}) = \frac{Pr(\text{previous heavy spin} | \text{current flavour})}{\Pr(\text{previous heavy spin} | \text{previous flavour})}.
 \end{equation}
-Figure (((REF))) illustrates how this equation has the effect of (as much as possible) ensuring the ``same'' random number is used to select both spins. Algorithm (((REF))) has high level pseudocode of the \textsc{CombineConditional} procedure which takes in the old flavour and spin and selects a hadron species accordingly.
+Figure (((REF))) illustrates how this equation has the effect of (as much as possible) ensuring the ``same'' random number is used to select both spins. Algorithm \ref{alg:conditional-combine} has high level pseudocode of the \textsc{CombineConditional} procedure which takes in the old flavour and spin and selects a hadron species accordingly.
 
 Figure (((REF))) shows how the rapidity plateau and hadrochemistry SSE vary as \texttt{probRevertFinal} varies from 0 to 1. As expected, increasing \texttt{probRevertFinal} decreases the SSE, and while there is some worsening of the rapidity plateau (since reverting the final break on average increases the energy available for the final two), the effect is quite mild. Through experimentation with all four parameters, the combination (((VALUES))) was found to give a good improvement in the rapidity plateau with a lessened effect on SSE compared to the same values with $\texttt{probRevertFinal = 0}$, as shown in Figure (((REF))).
 
