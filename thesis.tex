@@ -424,16 +424,47 @@ Not included in Algorithm \ref{alg:default} or the pseudocode above is a descrip
 Worth mentioning is a paper by Ed\'en investigating the deviations from the Lund model area law inherent in a procedure where string ends are joined once the remaining energy is below some threshold, even when the final two hadrons are created in a Lorentz invariant manner \cite{Eden:2000in}. Ed\'en presents theoretical solutions to these deviations, but they are a separate but related problem to the issue we will see of the kinematics and hadronic chemistry of the final two being different to the hadrons along the rest of the string. As such, the problems presented by Ed\'en will not be considered further within the scope of this thesis.
 
 \section{The Joining Step}
-\begin{enumerate}
-\item Pseudocode: The PYTHIA finalTwo
-\item Explain in close detail how the finalTwo joining step works in PYTHIA.
-\item Explain the stopMass, stopNewFlav, and stopSmear parameters work.
-\item Note the inherent violation of lightcone scaling. Explain how the manual and documentation claim this is resolved.
-\end{enumerate}
 
-Having established the overall structure of the PYTHIA fragmentation algorithm, we can now look more closely at how and when the final two hadrons are created. The remaining string mass at which the \textsc{FinalTwo} procedure fails is stipulated by the procedure \textsc{Wmin}, shown in Algorithm \ref{alg:wmin}. The behaviour of \textsc{Wmin} depends on three parameters in PYTHIA. The first is \texttt{StringFragmentation:stopMass}, which allows the mean $W_\text{min}$ to be adjusted. The next is \texttt{StringFragmentation:stopNewFlav}, which also adjusts the mean of $W_\text{min}$ but with a dependence on the new string break quark mass. This allows for fragmentation to be stopped earlier in order to have sufficient energy to create heavier final hadrons (although there is still not always enough energy). Finally, \texttt{StringFragmentation:stopSmear} controls the spread of the $W_\text{min}$ values that are used. The default values of these parameters in PYTHIA are shown in Table (((REF))). Note how \texttt{stopMass} was changed from 0.8 to 1.0 between PYTHIA 6 and 8.315. This change has since been reverted in PYTHIA 8.316.
+\begin{table}[]
+  \centering
+  \begin{tabular}{l|ll}
+    & \textbf{PYTHIA 6} & \textbf{PYTHIA 8} \\ \hline
+    \texttt{stopMass}    & 0.8               & 1.0               \\
+    \texttt{stopNewFlav} & 2.0               & 2.0               \\
+    \texttt{stopSmear}                   & 0.2               & 0.2
+  \end{tabular}
+  \caption{Default values for final two procedure parameters in PYTHIA 6 and PYTHIA 8 \cite{PYTHIAmanualold,Sjostrand:2006za}. Note the change in \texttt{stopMass}.}
+  \label{tab:defaults}
+\end{table}
 
-Figures (((REF, REF, and REF))) show the effects of adjusting these three parameters on the probability distribution of actual $W_\text{rem}$ values encountered at the final two step, as simulated in PYTHIA 8.315 for $d\bar{d}$ hadronisation at \qty{200}{\giga\electronvolt} (with default settings, including the Monash tune). These plots show how \texttt{stopMass} and \texttt{stopNewFlav} affect the mean of $W_\text{min}$, while \texttt{stopSmear} affects the spread.
+Having established the overall structure of the PYTHIA fragmentation algorithm, we can now look more closely at how and when the final two hadrons are created. The remaining string mass at which the \textsc{FinalTwo} procedure fails is stipulated by the procedure \textsc{Wmin}, shown in Algorithm \ref{alg:wmin}. The behaviour of \textsc{Wmin} depends on three parameters in PYTHIA. The first is \texttt{StringFragmentation:stopMass}, which allows the mean $W_\text{min}$ to be adjusted. The next is \texttt{StringFragmentation:stopNewFlav}, which also adjusts the mean of $W_\text{min}$ but with a dependence on the new string break quark mass. This allows for fragmentation to be stopped earlier in order to have sufficient energy to create heavier final hadrons (although there is still not always enough energy). Finally, \texttt{StringFragmentation:stopSmear} controls the spread of the $W_\text{min}$ values that are used. The default values of these parameters in PYTHIA are shown in Table \ref{tab:defaults}. Note how \texttt{stopMass} was changed from 0.8 to 1.0 between PYTHIA 6 and 8.315. This change has since been reverted in PYTHIA 8.316.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}{0.32\linewidth}
+    \centering
+    \includesvg[width=\textwidth]{figures/wrem_stopmass.svg}
+    \caption{For stopMass.}
+    \label{fig:wrem-stopmass}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.32\linewidth}
+    \centering
+    \includesvg[width=\textwidth]{figures/wrem_stopnewflav.svg}
+    \caption{For stopNewFlav.}
+    \label{fig:wrem-stopnewflav}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.32\linewidth}
+    \centering
+    \includesvg[width=\textwidth]{figures/wrem_stopsmear.svg}
+    \caption{For stopSmear.}
+    \label{fig:wrem-stopsmear}
+  \end{subfigure}
+  \caption{Distributions of the remaining available string mass $W_\text{rem}$ when entering the \texttt{finalTwo} procedure, for $d\bar{d}$ hadronisation at \qty{200}{\giga\electronvolt} in PYTHIA 8.316. Each plot shows how one of the three \texttt{finalTwo} parameters affects the distribution of $W_\text{rem}$. \texttt{stopMass} and \texttt{stopNewFlav} have the effect of shifting the centre of the distribution (with some impact on the spread), while \texttt{stopSmear} primarily affects the spread. Note that these $W_\text{rem}$ values include runs of \texttt{finalTwo} that would eventually be vetoed, such that the plots represent the actual distribution of values encountered at the start of the \texttt{finalTwo} procedure.}
+\end{figure}
+
+Figures \ref{fig:wrem-stopmass}, \ref{fig:wrem-stopnewflav}, and \ref{fig:wrem-stopsmear} show the effects of adjusting these three parameters on the probability distribution of actual $W_\text{rem}$ values encountered at the final two step, as simulated in PYTHIA 8.315 for $d\bar{d}$ hadronisation at \qty{200}{\giga\electronvolt} (with default settings, including the Monash tune). These plots show how \texttt{stopMass} and \texttt{stopNewFlav} affect the mean of $W_\text{min}$, while \texttt{stopSmear} affects the spread.
 
 \begin{algorithm}
   \caption{The procedure to determine the $W_\text{min}$ string mass threshold to stop fragmentation.}\label{alg:wmin}
@@ -484,13 +515,15 @@ The fragmentation algorithm used in PYTHIA 8.316 manifestly violates Lorentz cov
 \begin{figure}
   \centering
   \includesvg[width=0.7\linewidth]{figures/dNdy_versionplots.svg}
-  \caption{Plots of the rapidity plateau $\frac{dN}{dy}$ as a function of rapidity $y$, using default settings of different PYTHIA versions. Events were generated for $d\bar{d}$ hadronisation at \qty{200}{\giga\electronvolt}, with 10,000,000 events. PYTHIA 6.428 (released in 2006) is the final version written in FORTRAN, and uses the default JETSET tune. PYTHIA 8.186 (released in 2014) is the final version of PYTHIA 8.1 and written in C++. It uses the Hoeth tune. Finally, PYTHIA 8.315 (released in 2025) is the second-most-current release and uses the Monash tune. The rapidity plateau in PYTHIA 6.428 is flat in the middle, with bumps on either end due to endpoint effects. Both PYTHIA 8 versions have plateaus with dips in the middle, with deviations from a flat plateau by around 5\%. (((TODO: quantify this further?))) Evidently, the Lorentz invariance of hadron density per unit rapidity has been violated for over a decade, at least since the release of PYTHIA 8.1.}
+  \caption{Plots of the rapidity plateau $\frac{dN}{dy}$ as a function of rapidity $y$, using default settings of different PYTHIA versions. Events were generated for $d\bar{d}$ hadronisation at \qty{200}{\giga\electronvolt}, with 10,000,000 events \protect\footnotemark. PYTHIA 6.428 (released in 2006) is the final version written in FORTRAN, and uses the default JETSET tune. PYTHIA 8.186 (released in 2014) is the final version of PYTHIA 8.1 and written in C++. It uses the Hoeth tune. Finally, PYTHIA 8.315 (released in 2025) is the second-most-current release and uses the Monash tune. The rapidity plateau in PYTHIA 6.428 is flat in the middle, with bumps on either end due to endpoint effects. Both PYTHIA 8 versions have plateaus with dips in the middle, with deviations from a flat plateau by around 5\%. (((TODO: quantify this further?))) Evidently, the Lorentz invariance of hadron density per unit rapidity has been violated for over a decade, at least since the release of PYTHIA 8.1.}
   \label{fig:version-plots}
 \end{figure}
 
+\footnotetext{In general, the plots shown in this thesis are generated using at least 1,000,000 events. Specific numbers are not included for brevity, but the number of events is selected such that the curve is smooth and uncertainties are negligible. As a result, uncertainties are also generally not included in plots.}
+
 A simple picture of the Lorentz covariance of the kinematics of hadrons along the string can be obtained from the shape of the rapidity plateau. Figure \ref{fig:version-plots} shows the rapidity plateaus ($dN/dy$ distributions) for $d\bar{d}$ hadronisation across PYTHIA 6.428 (which uses the JETSET tune), PYTHIA 8.186 (which uses the Hoeth tune), and PYTHIA 8.315 (which uses the JETSET tune) \footnote{PYTHIA 8.315 is used here rather than PYTHIA 8.316 because the change to \texttt{stopMass} in PYTHIA 8.316 provides a small improvement in the flatness of the rapidity plateau.}. These results are for a rather long \qty{200}{\giga\electronvolt} string, for which a very flat central region would be expected in the rapidity plateau. Indeed, the plateau in PYTHIA 6.428 is entirely flat in the middle, with the ``ears'' on either side explainable by endpoint effects, since Lorentz covariance only applies away from the endpoints.
 
-On the other hand, the plateaus for both PYTHIA 8 versions show a significant dip in the middle, deviating from flatness by around 5\%. To factor out effects of different PYTHIA versions being coded differently, Figure (((REF))) shows the same rapidity plateaus for these three tunes, all within PYTHIA 8.315. Notably, the plateau for the JETSET tune is not as flat. This is a result of a bug in how hadron kinematics are calculated in PYTHIA 8 \footnote{This bug was introduced when PYTHIA was ported to C++ from FORTRAN, between versions 6 and 8. It was discovered by Stephen Mrenna a few weeks before this thesis was submitted \cite{steve}, and there was not enough time in this project to properly investigate the implications.} \cite{steve}. It is, however, mostly flat, and there is still a much larger dip for the Hoeth and Monash tunes. Figure (((REF))) shows how the rapidity plateau for the Monash tune varies across $20, 50, 100,\text{ and } \qty{200}{\giga\electronvolt}$ strings.
+On the other hand, the plateaus for both PYTHIA 8 versions show a significant dip in the middle, deviating from flatness by around 5\%. To factor out effects of different PYTHIA versions being coded differently, Figure (((REF))) shows the same rapidity plateaus for these three tunes, all within PYTHIA 8.315. Notably, the plateau for the JETSET tune is not as flat. This is a result of a bug in how hadron kinematics are calculated in PYTHIA 8 \footnote{This bug was introduced when PYTHIA was ported to C++ from FORTRAN, between versions 6 and 8. It was discovered by Stephen Mrenna a few weeks before this thesis was submitted \cite{steve}, and there was not enough time in this project to properly investigate the implications.} \cite{steve}. It is, however, mostly flat, and there is still a much larger dip for the Hoeth and Monash tunes. Figure (((REF))) shows how the rapidity plateau for the Monash tune varies across $50, 100, 200 \text{ and } \qty{500}{\giga\electronvolt}$ strings.
 
 (((HADRON-SPECIFIC)))
 
