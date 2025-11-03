@@ -357,7 +357,11 @@ There are a number of other string topologies that can emerge in the evolution o
 
 \chapter{String Fragmentation in PYTHIA}
 \label{chap:fragmentation}
+\section{Introduction}
+With the requisite background theory covered, this section will go on to describe how the Lund model of string fragmentation is implemented in PYTHIA, and how this implementation performs. Section \hyperref[sec:pythia-frag]{3.1} describes the algorithm used for $q\bar{q}$ hadronisation in PYTHIA 8, owing to the description of the algorithm in the manuals \cite{Bierlich:2022pfr,Sjostrand:2006za,PYTHIAmanualold} as well as looking at the actual code. Section \hyperref[sec:final-two]{3.2} goes on to describe how the \texttt{finalTwo} procedure works, which creates the final two hadrons to preserve conservation of energy. Finally, Section \hyperref[sec:performance]{3.3} marks the beginning of the original research, and evaluates the Lorentz covariance of the PYTHIA 8 hadronisation algorithm.
+
 \section{The PYTHIA Fragmentation Algorithm}
+\label{sec:pythia-frag}
 Having established how the Lund string model describes hadronisation, we can now proceed to a description of how this model is implemented in the PYTHIA event generator. Actual events involve many hundreds of outgoing partons from the parton shower, and these will combine into various string topologies. For the purposes of this project, we will focus solely on the fragmentation of a $q\bar{q}$ string into a number of outgoing primary hadrons, prior to decays, and without any gluon kinks, loops, or junctions. As we will see, Lorentz invariance is entirely violated in PYTHIA even in this minimal situation.
 
 In the Lund model, the Schwinger mechanism describes the relative probabilities of quark flavours in a string breakup. In turn, the probabilities of forming the various possible hadrons from a combination of quarks and antiquarks are theoretically dependent only on the various mixings of quark states that comprise the hadrons. In PYTHIA, these probabilities are implemented as tunable parameters, but the overall process is the same. Also described by the Schwinger mechanism is the transverse momenta of the quarks formed in string breakups, and therefore the transverse momenta of all final-state hadrons.
@@ -424,7 +428,7 @@ Not included in Algorithm \ref{alg:default} or the pseudocode above is a descrip
 Worth mentioning is a paper by Ed\'en investigating the deviations from the Lund model area law inherent in a procedure where string ends are joined once the remaining energy is below some threshold, even when the final two hadrons are created in a Lorentz invariant manner \cite{Eden:2000in}. Ed\'en presents theoretical solutions to these deviations, but they are a separate but related problem to the issue we will see of the kinematics and hadronic chemistry of the final two being different to the hadrons along the rest of the string. As such, the problems presented by Ed\'en will not be considered further within the scope of this thesis.
 
 \section{The Joining Step}
-
+\label{sec:final-two}
 \begin{table}[]
   \centering
   \begin{tabular}{l|ll}
@@ -510,6 +514,7 @@ When the remaining string energy is below $W_\text{min}$, the \textsc{FinalTwo} 
 There are three possible ways for this procedure to fail, as shown in the pseudocode. Firstly, if the remaining string energy is already negative when \textsc{FinalTwo} is called, it will fail. This occurs if the previous hadron created in the fragmentation loop took more energy than was remaining in the string. Secondly, if the two leftover flavours for the other final hadron are both diquarks, then \textsc{FinalTwo} also fails, since there are no tetraquark states in PYTHIA. Finally, if there is insufficient energy in the string to create the final two hadrons with their required transverse momenta and masses, \textsc{FinalTwo} fails. In all of these cases, the event is discarded, and fragmentation begins again from the beginning.
 
 \section{Performance of the Current finalTwo Procedure}
+\label{sec:performance}
 The fragmentation algorithm used in PYTHIA 8.316 manifestly violates Lorentz covariance in how it handles the final two hadrons. The longitudinal kinematics of these hadrons are determined to enforce energy conservation, without the degrees of freedom available to the rest of the hadrons produced along the string. Unless the three parameters controlling $W_\text{min}$ are tuned perfectly (if such a thing is possible --- we will find it is not), the kinematics of the final two hadrons will therefore be differently distributed than the hadrons produced along the string. We will denote these hadrons produced outside of the final two and not adjacent to the endpoints as ``regular'' hadrons. On top of a deviation in kinematics, the fact that \textsc{FinalTwo} can fail introduces biases in the species composition of the final two, which we will denote the ``hadrochemistry''. As such, the hadrochemistry of the final two hadrons will be different from the hadrochemistry of regular hadrons. These deviations in the kinematics and hadrochemistry of the final two hadrons comprise the violation of Lorentz covariance introduced by this handling of energy conservation in PYTHIA's string fragmentation algorithm.
 
 \begin{figure}
@@ -529,7 +534,7 @@ A simple picture of the Lorentz covariance of the kinematics of hadrons along th
   \begin{minipage}[t]{0.49\linewidth}
     \centering
     \includesvg[width=\linewidth]{figures/dNdy_differenttunes.svg}
-    \caption{Plots of the rapidity plateau $dN/dy$ as a function of rapidity $y$ in PYTHIA 8.316 across the Monash, JETSET, and Hoeth tunes. Separate plots are shown for the Monash tune in the versions PYTHIA 8.315 and PYTHIA 8.316, between which \texttt{stopMass} was changed from 1.0 to 0.8. This has the effect of making the rapidity plateau slightly more flat. The rapidity plateau for the JETSET tune is not the same as that in Figure \ref{fig:version-plots}. This is because of a bug introduced in PYTHIA 8 that was not present in PYTHIA 6.}
+    \caption{Plots of the rapidity plateau $dN/dy$ as a function of rapidity $y$ in PYTHIA 8.316 across the Monash, JETSET, and Hoeth tunes \protect\footnotemark. Separate plots are shown for the Monash tune in the versions PYTHIA 8.315 and PYTHIA 8.316, between which \texttt{stopMass} was changed from 1.0 to 0.8. This has the effect of making the rapidity plateau slightly more flat. The rapidity plateau for the JETSET tune is not the same as that in Figure \ref{fig:version-plots}. This is because of a bug introduced in PYTHIA 8 that was not present in PYTHIA 6. }
     \label{fig:dNdy-different-tunes}
   \end{minipage}
   \hfill
@@ -540,6 +545,8 @@ A simple picture of the Lorentz covariance of the kinematics of hadrons along th
     \label{fig:dNdy-string-masses}
   \end{minipage}
 \end{figure}
+
+\footnotetext{In PYTHIA, whenever parameters are adjusted or an old tune is used, the parameter \texttt{StringZ:useOldAExtra} is automatically switched on. This parameter is off by default, but can be switched on to use the incorrect behaviour of the \texttt{StringZ:aExtraDiquark} parameter prior to a bugfix. This is useful for recreating old results, but for the purposes of this thesis it will always be switched off.}
 
 \begin{figure}
   \centering
@@ -601,11 +608,11 @@ The dip in the rapidity plateau occurs because of these two effects. The final t
   \label{fig:hadrochemistry-monash}
 \end{figure}
   
-We also note here the large deviations in hadrochemistry of the final two hadrons. Figure \ref{fig:hadrochemistry-monash} shows the percentage differences in the proportions of hadron species produced in the final two compared to regular hadrons. Hadrons are ordered by mass along the horizontal axis, and antiparticles are counted as the same species as particles (since they have identical masses, and string fragmentation is symmetric under charge conjugation). The dependence of the deviations (or their direction) on mass is complex. It would be expected that the bias introduced by refragmenting the string when there is insufficient energy to create the final hadrons would lead to a bias towards lighter hadrons. This is somewhat visible --- $\pi^0$ is overproduced by $22.84 \pm 0.08 \%$ and $\Delta^0$ is underproduced by $25.9 \pm 0.2 \%$. However, other biases are introduced by the diquark joining failures of \textsc{FinalTwo} as well as effects of \texttt{stopNewFlav}. There is also an additional bias introduced since quark flavours are reselected in Algorithm \ref{alg:default} when \textsc{combine} fails, but quark flavours are never reselected in Algorithm \ref{alg:finaltwo}. As a whole, these deviations in hadrochemistry can be expressed by the sum of squared errors, given by
+We also note here the large deviations in hadrochemistry of the final two hadrons. Figure \ref{fig:hadrochemistry-monash} shows the percentage differences in the proportions of hadron species produced in the final two compared to regular hadrons. Hadrons are ordered by mass along the horizontal axis, and antiparticles are counted as the same species as particles (since they have identical masses, and string fragmentation is symmetric under charge conjugation). The dependence of the deviations (or their direction) on mass is complex. It would be expected that the bias introduced by refragmenting the string when there is insufficient energy to create the final hadrons would lead to a bias towards lighter hadrons. This is somewhat visible --- $\pi^0$ is overproduced by $22.84 \pm 0.08 \%$ and $\Delta^0$ is underproduced by $25.9 \pm 0.2 \%$. However, other biases are introduced by the diquark joining failures of \textsc{FinalTwo} as well as effects of \texttt{stopNewFlav}. There is also an additional bias introduced since quark flavours are reselected in Algorithm \ref{alg:default} when \textsc{combine} fails, but quark flavours are never reselected in Algorithm \ref{alg:finaltwo}. As a whole, these deviations in hadrochemistry can be expressed by the sum of squared errors, given by a chi-squared distribution
 \begin{equation}
-  \text{SSE} = \sum_{\{i\}} (p_{i,\text{final}} - p_{i,\text{reg}})^2,
+  \text{SSE} = \chi^2 = \sum_i \frac{(p_{i,\text{final}} - p_{i,\text{reg}})^2}{p_{i,\text{reg}}},
 \end{equation}
-where $\{i\}$ runs over all hadron species, $p_{i,\text{final}}$ is the proportion of hadron species $i$ in the final two hadrons, and $p_{i,\text{reg}}$ is the proportion of hadron species $i$ in regular hadrons.
+where $i$ runs over all hadron species, $p_{i,\text{final}}$ is the proportion of hadron species $i$ in the final two hadrons, and $p_{i,\text{reg}}$ is the proportion of hadron species $i$ in regular hadrons.
 
 \begin{figure}
   \centering
@@ -624,7 +631,7 @@ where $\{i\}$ runs over all hadron species, $p_{i,\text{final}}$ is the proporti
 
 The values of the sum of squared errors for the JETSET and Monash tunes are shown in Figure \ref{fig:ssefail-monjet}, alongside the average number of failures per generated event. Evidently, for both tunes, the failure rate of \texttt{finalTwo} is high, and there are notable deviations in hadronic chemistry.
 
-In conclusion, the algorithmic implementation of the Lund model in PYTHIA implements energy conservation by manifestly breaking Lorentz covariance. This violation of Lorentz covariance did not lead to a non-flat rapidity plateau in earlier versions of PYTHIA because in the JETSET tune the rapidity spacing was similar between final and regular hadrons. However, in the Hoeth tune (and later the Monash tune), the value of \texttt{stopMass} required for a flat plateau became much smaller, and since this value was not actually adjusted, a dip was introduced to the rapidity plateau, where it remained for over a decade. Aside from the deviation in kinematics, the hadrochemistry of the final hadrons is also distributed differently than regular hadrons across all tunes because of the high failure rate of \texttt{finalTwo}. This failure rate also causes difficulties in statistical analysis and machine learning using PYTHIA \cite{Butter:2025wxn} (((MORE?))).
+In conclusion, the algorithmic implementation of the Lund model in PYTHIA implements energy conservation by manifestly breaking Lorentz covariance. This violation of Lorentz covariance did not lead to a non-flat rapidity plateau in earlier versions of PYTHIA because in the JETSET tune the rapidity spacing was similar between final and regular hadrons. However, in the Hoeth tune (and later the Monash tune), the value of \texttt{stopMass} required for a flat plateau became much smaller, and since this value was not actually adjusted, a dip was introduced to the rapidity plateau, where it remained for over a decade. Aside from the deviation in kinematics, the hadrochemistry of the final hadrons is also distributed differently than regular hadrons across all tunes because of the high failure rate of \texttt{finalTwo}. This failure rate also causes difficulties in statistical analysis and machine learning using PYTHIA \cite{Butter:2025wxn,Assi:2025gog}.
 
 As a whole, the violation of Lorentz covariance in PYTHIA hadronisation is quite severe, and represents quite a large deviation from the theoretical predictions of the Lund model. As an immediate solution, \texttt{stopMass} was reverted to 0.8 in PYTHIA 8.316, which provides a slightly flatter rapidity plateau. The PYTHIA online manual was also updated to reflect this new understanding. The rest of this thesis explores techinques for restoring or preserving Lorentz covariance in PYTHIA, through tuning the $W_\text{min}$ parameters, introducing a new parameter, and redesigning the fragmentation model.
 
@@ -707,9 +714,7 @@ Figure (((REF))) illustrates how this equation has the effect of (as much as pos
 Figure (((REF))) shows how the rapidity plateau and hadrochemistry SSE vary as \texttt{probRevertFinal} varies from 0 to 1. As expected, increasing \texttt{probRevertFinal} decreases the SSE, and while there is some worsening of the rapidity plateau (since reverting the final break on average increases the energy available for the final two), the effect is quite mild. Through experimentation with all four parameters, the combination (((VALUES))) was found to give a good improvement in the rapidity plateau with a lessened effect on SSE compared to the same values with $\texttt{probRevertFinal = 0}$, as shown in Figure (((REF))).
 
 \section{Limitations}
-The \texttt{probRevertFinal} parameter successfully provides more parameter space and allows for Lorentz covariance to be restored further. However, the rapidity plateau in Figure (((REF))) is not as flat as that of the JETSET tune in Figure (((REF))), and the hadrochemistry SSE is enough for noticeable distortions in particle spectra across the string. The shape of the $\Delta y$ distribution is also different between regular and final hadrons. Finally, the manifest breaking of Lorentz covariance in the structure of the algorithm means that restoring Lorentz covariance by obtaining a flat rapidity plateau and a negligible hadrochemistry SSE is impossible without using a different model to conserve energy in string fragmentation.
-
-One might assume the thesis would end here by describing the impact of this research and the possibilities for further investigations. The attuned reader, though, would realise that this feels like a narratively unsatisfying ending to the paper. The reader can rest assured that the humble author is goated. In the next section, we describe a new model of string fragmentation that enforces energy conservation in a Lorentz covariant way, restoring Lorentz covariance to the PYTHIA hadronisation algorithm.
+The \texttt{probRevertFinal} parameter successfully provides more parameter space and allows for Lorentz covariance to be restored further. However, the rapidity plateau in Figure (((REF))) is not as flat as that of the JETSET tune in Figure (((REF))), and the hadrochemistry SSE is enough for noticeable distortions in particle spectra across the string. The shape of the $\Delta y$ distribution is also different between regular and final hadrons. Finally, the manifest breaking of Lorentz covariance in the structure of the algorithm means that restoring Lorentz covariance by obtaining a flat rapidity plateau and a negligible hadrochemistry SSE is impossible without using a different model to conserve energy in string fragmentation. In the next section, we describe a new model of string fragmentation that enforces energy conservation in a Lorentz covariant way, restoring Lorentz covariance to the PYTHIA hadronisation algorithm.
 
 \chapter{The Accordion Model of String Fragmentation}
 \label{chap:accordion}
@@ -723,11 +728,68 @@ The accordion model of string fragmentation preserves Lorentz covariance by allo
 Figure (((REF))) shows a schematic illustration of how the default PYTHIA 8.316 string fragmentation algorithm implements hadronisation, and Figure (((REF))) shows a similar diagram for the accordion model.
 
 \section{Pseudocode}
-Algorithm (((REF))) shows the \textsc{Fragment} algorithm used to implement the accordion model of $q\bar{q}$ hadronisation in PYTHIA. The flag \texttt{StringFragmentation:accordionModel} can be toggled on to enable this model. In this algorithm, the main fragmentation loop is stopped if there is insufficient energy left in the string to produce a hadron, or if, after producing a hadron, the remaining string energy $W_\text{rem}$ is less than a $W_\text{min}$ value determined according to algorithm \textsc{Wmin}. The \texttt{StringFragmentation:stopMass} and \texttt{StringFragmentation:stopSmear} parameters are still used to set the mean and smearing of $W_\text{min}$, but \texttt{StringFragmentation:stopNewFlav} is unused since a new string break has not been selected at this stage.
+\begin{algorithm}
+  \caption{The algorithm for $q\bar{q}$ hadronisation used to implement the accordion model.}
+  \label{alg:fragment-accordion}
+  \begin{algorithmic}
+    \Procedure{Fragment}{$E_\text{CM}, \text{flav}_{+\text{end}}, \text{flav}_{-\text{end}}$}
+      \State initialise event record
+      \Repeat
+        \Loop
+          \State $\text{fromPos} \gets$ true or false with equal probability \Comment{$\pm$ and $\mp$ reflect this selection}
+          \State{select transverse momenta for string break}
+          \Repeat
+            \State{select flavour for string break}
+            \State{select species and mass for new hadron}
+            \State{select $z$ fraction for new hadron}
+          \Until {\textsc{Combine} succeeds}
+          \State{calculate energy and longitudinal momentum for new hadron}
+          \If{$E < 0$}
+            \State \textcolor{red}{newHadronNeeded $\gets$ false}
+            \State \textcolor{red}{\textbf{break}}
+          \EndIf
+          \State $\text{append new hadron with } (\text{species}, m, \vec{p}_\perp, p_z, E) \text{ to } \texttt{event}$
+          \If{$\sqrt{p^+ p^-} \leq \texttt{stopMass}$ or $p^+ + p^- < 0$} \Comment{remaining string mass below threshold, or negative remaining energy}
+            \State \textcolor{red}{newHadronNeeded $\gets$ true}
+          \EndIf
+        \EndLoop
+        \State \textcolor{red}{$\textsc{FinalTwoAccordion}(\texttt{event}, \text{newHadronNeeded}, \text{fromPos}, q_{+\text{end}}, q_{-\text{end}}, \text{species}, m, \vec{p}_\perp)$}
+      \Until {$\textsc{FinalTwoAccordion}$ succeeds}
+      \State \Return \texttt{event}
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+Algorithm \ref{alg:fragment-accordion} shows the \textsc{Fragment} algorithm used to implement the accordion model of $q\bar{q}$ hadronisation in PYTHIA. The flag \texttt{StringFragmentation:accordionModel} can be toggled on to enable this model. In this algorithm, the main fragmentation loop is stopped if there is insufficient energy left in the string to produce a hadron, or if, after producing a hadron, the remaining string energy $W_\text{rem}$ is less than a $W_\text{min}$ value determined according to algorithm \textsc{Wmin}. The \texttt{StringFragmentation:stopMass} and \texttt{StringFragmentation:stopSmear} parameters are still used to set the mean and smearing of $W_\text{min}$, but \texttt{StringFragmentation:stopNewFlav} is unused since a new string break has not been selected at this stage.
 
 Note that the flavour selection in the string breaking has been adjusted such that the $q\bar{q}$ flavour is selected only once, rather than being re-selected every time \textsc{Combine} fails. The previous behaviour violated Lorentz covariance, because the flavour re-selection introduced a bias towards hadrons that did not sometimes fail in \textsc{Combine} \footnote{Failures of \textsc{Combine} are intended effects to produce the hadron species distributions enforced by the \texttt{StringFlav} parameters.}.
 
-Upon stopping the fragmentation loop, the final two hadrons are created according to Algorithm (((REF))). Firstly, a new string break is selected according to the Schwinger mechanism if necessary. The transverse momenta of the final two hadrons can then be calculated. Next, the hadron species and masses are selected according to the quark flavours, in the same manner as the rest of the hadrons from the fragmentation loop.
+\begin{algorithm}
+  \caption{The algorithm used by the accordion model to create the final two hadrons.}
+  \label{alg:accordion-final-two}
+  \begin{algorithmic}
+    \Procedure{FinalTwoAccordion}{$\texttt{event}, \text{newHadronNeeded}, \text{fromPos}, q_{+\text{end}}, q_{-\text{end}}, q_{+\text{break}}, q_{-\text{break}}, \text{species}, m, \vec{p}_\perp, z_{\pm,\text{last}}, m_{\pm,\text{last}}$}
+      \If {newHadronNeeded}\Comment{$\pm$ and $\mp$ reflect fromPos selection}
+        \State $\text{flav}_{+\text{break}}, \text{flav}_{-\text{break}} \gets$ values from \textsc{FlavSel}
+        \State $\text{species}_+, m_+, \vec{p}_{\perp,+} \gets$ values from \textsc{Combine}, \textsc{mSel}, and Equation \eqref{eq:schwinger-mechanism}
+      \Else
+        \State $\text{species}_+, m_+, \vec{p}_{\perp,+} \gets \text{species}, m, \vec{p}_\perp$
+      \EndIf
+      \State $\vec{p}_{\perp,\pm} \gets \vec{p}_{\perp,\pm\text{end}} + \vec{p}_{\perp,\pm\text{break}}$
+      \Repeat
+        \State $\text{species}_- \gets \textsc{Combine}(\text{flav}_{-\text{end}}, \text{flav}_{-\text{break}})$
+        \State $m_- \gets \textsc{mSel}(\text{species}_-)$
+      \Until {\textsc{Combine} succeeds}
+      \State $m_{\perp,\pm} \gets \sqrt{m_\pm^2 + |\vec{p}_{\perp,\pm}|^2}$
+      \State $z_\pm \gets \textsc{zSel}(\text{flav}_{\pm,\text{end}}, \text{flav}_{\pm,\text{break}}, m_{\perp,\pm})$
+      \State $\Delta y_\pm \gets -\ln\Bigr( \frac{z_{\pm}}{z_{\pm,\text{last}}} \frac{m_{\pm,\text{last}}}{m_\pm} (1 - z_{\pm,\text{last}}) \Bigr)$
+      \State $\Delta y_\text{between} \gets -\ln\Bigr( \frac{z_-}{z_+} \frac{m_+}{m_-} (1 - z_+) \Bigr)$
+    
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+Upon stopping the fragmentation loop, the final two hadrons are created according to Algorithm \ref{alg:accordion-final-two}. Firstly, a new string break is selected according to the Schwinger mechanism if necessary. The transverse momenta of the final two hadrons can then be calculated. Next, the hadron species and masses are selected according to the quark flavours, in the same manner as the rest of the hadrons from the fragmentation loop.
 
 The transverse masses can now be calculated, and these in turn are used to select trial $z$ fractions for each hadron according to the \textsc{zFrag} procedure. Then, equation \eqref{eq:rapidity-spacing} is used to calculate required rapidity spacings between the final two hadrons and their neighbours. Finally, the new hadrons and hadron jets created from the positive and negative string ends are boosted in order to obtain these rapidity spacings.
 
@@ -754,7 +816,7 @@ Figure (((REF))) shows the rapidity plateaus in \qty{200}{\giga\electronvolt} $d
 
 Figure (((REF))) shows the distributions of the rapidity spacing $\Delta y$ between hadrons adjacent in rank for regular hadrons, and between the final two hadrons and their neighbours. The distributions are significantly more similar than those shown in Figure (((REF))) for default PYTHIA fragmentation, but still do not exactly match, reflecting the inaccuracy of equation \eqref{eq:rapidity-spacing}.
 
-It is also worth mentioning the effect of the accordion join on the $z$ fractions, as calculated based on the final set of hadrons. For the default PYTHIA implementation of string fragmentation, the $z$ fractions are identical for regular hadrons, and significantly different for the final hadrons selected before the joining step, as shown in Figure (((REF))). This is expected, since in this algorithm the $z$ fractions are identically selected for all regular hadrons and are not adjusted afterwards --- the final two hadrons are then selected with different kinematics, causing the deviation in the final $z$ fractions.
+It is also worth mentioning the effect of the accordion join on the $z$ fractions, calculated from the final set of hadrons. For the default PYTHIA implementation of string fragmentation, the $z$ fractions are identical for regular hadrons, and significantly different for the final hadrons selected before the joining step, as shown in Figure (((REF))). This is expected, since in this algorithm the $z$ fractions are identically selected for all regular hadrons and are not adjusted afterwards --- the final two hadrons are then selected with different kinematics, causing the deviation in the final $z$ fractions.
 
 Figure (((REF))) shows the retrospective $z$ fractions of hadrons produced using the accordion model. Unlike the default PYTHIA model, the accordion model leads to different $z$ fractions being selected for hadrons towards the centre of the string, with a significant increase in very small z fractions. This does not necessarily imply a violation of Lorentz covariance. The identical and independent distribution of $z$ fractions is a consequence of Lorentz covariance in the asymptotic limit of infinite remaining string energy and fragmentation solely in one direction, and this property is still approximately maintained in the centre of of the string, despite the odd shape of the distribution. There is no longer a significant deviation in $z$ fractions adjacent to the final two hadrons, and the deviation is limited to the string endpoints, which is more in accordance with the physical properties of the string.
 
@@ -765,20 +827,20 @@ In all cases, the hadronic chemistry SSE is negligible, especially compared to t
 
 Despite the success of the accordion model in preserving Lorentz covariance, there are a number of limitations. Firstly, the Lorentz covariance of the current PYTHIA implementation of the accordion model is only approximate, as evidenced by the need to tune \texttt{stopMass} and \texttt{stopSmear} for a flat plateau, as well as the deivations from flatness in the species-specific rapidity plateaus. This occurs because the combination of a trial \textsc{zFrag} selection and equation \eqref{eq:rapidity-spacing} does not provide a distribution of $\Delta y$ that is identical to that of regular hadrons. Equation \eqref{eq:rapidity-spacing} is derived in the situation where fragmentation is left-to-right or right-to-left, but not a combination of both. For any two rank-adjacent hadrons produced in fragmentation, there could have been a number of hadrons fragmented from the other end between their creation, which would affect the energies and momenta of those two hadrons and therefore their rapidity spacing. Ideally, an implementation of the accordion model would accurately reproduce the effect of randomly fragmenting from either end on the distribution of $\Delta y$ in its selection of rapidity spacings for the final two hadrons and their neighbours. This is one potential future extension of the model.
 
-Furthermore, the accordion model has only been implemented for hadronisation of a single $q\bar{q}$ string, with the popcorn model of baryon production switched off. In an actual PYTHIA event, there are dozens of such processes, which often involve more complicated topologies including gluon kinks, loops, and string junctions. It is not immediately obvious how the property of Lorentz covariance or the global energy conservation of the accordion model would apply to these situations, and further development of analytic models as well as practical implementations is required in order to produce full $p\bar{p}$ collision events using the accordion model.
+Furthermore, the accordion model has only been implemented for hadronisation of a single $q\bar{q}$ string, with the popcorn model of baryon production switched off. In an actual PYTHIA event, there are dozens of such processes (((REWRITE, ee pp))), which often involve more complicated topologies including gluon kinks, loops, and string junctions. It is not immediately obvious how the property of Lorentz covariance or the global energy conservation of the accordion model would apply to these situations, and further development of analytic models as well as practical implementations is required in order to produce full $p\bar{p}$ collision events using the accordion model.
 
 The tests carried out in the scope of this project to verify the Lorentz covariance of the accordion model are limited. Future studies could compare observables between events generated using the accordion model and LHC data. Particle-particle correlations should also be more thoroughly investigated to ensure Lorentz covariance is preserved beyond just a flat rapidity plateau and negligible SSE. Finally, a thorough analysis of the time complexity and runtime of PYTHIA using the accordion model should be carried out, alongside refactoring the code for better efficiency and performance.
 
 \chapter{Summary and Outlook}
-This project investigated the property of Lorentz covariance in the Lund model of string fragmentation, with a focus on the current implementation in PYTHIA. It was found that in PYTHIA 8.1 and later versions, Lorentz covariance is violated, resulting in a dip in the rapidity plateau and deviations in the hadronic chemistry of the final two hadrons. This violation is inherent in the hadronisation algorithm currently used in PYTHIA, which produces the final two hadrons in a different manner than the rest, and introduces a bias in hadronic chemistry by refragmenting the string when there is insufficient energy to do so.
+This project investigated the property of Lorentz covariance in the Lund model of string fragmentation, with a focus on the current implementation in PYTHIA 8. It was found that the hadroniation algorithm currently used in PYTHIA manifestly violates Lorentz covariance in the production of the final two hadrons, which have kinematics and hadronic chemistry that are selected in a different manner than the rest of the hadrons. In PYTHIA 8.1 and later versions, this Lorentz covariance is particularly apparent, resulting in a noticeable dip in the rapidity plateau.
 
 In the JETSET tune used in earlier versions of PYTHIA, it was possible to tune the \texttt{stopMass}, \texttt{stopNewFlav}, and \texttt{stopSmear} parameters in order to obtain a flat rapidity plateau. However, the changes in fragmentation functions and flavour/species distributions in the newer Hoeth and Monash tunes make tuning for a flat rapidity plateau impossible without significantly worsening the deviations in hadronic chemistry of the final two hadrons.
 
-A new parameter, \texttt{probRevertFinal}, was implemented, which provides a probability that the final string break will be undone when there is insufficient energy to create the final two (rather than refragmenting the string). Using this parameter, the effect of tuning for a flat plateau on the final two hadronic chemistry can be somewhat mitigated. However, restoring Lorentz covariance remains impossible even with this expansion to the parameter space.
+As a first, minimal modification, a new parameter, \texttt{probRevertFinal}, was implemented, which provides a probability that the final string break will be undone when there is insufficient energy to create the final two (rather than refragmenting the string). Using this parameter, the effect of tuning for a flat plateau on the final two hadronic chemistry can be somewhat mitigated. However, restoring Lorentz covariance remains impossible even with this expansion to the parameter space.
 
 The accordion model of string fragmentation, which enforces energy conservation by a global, Lorentz covariant dilation in rapidity space, was implemented in PYTHIA and found to approximately preserve Lorentz covariance. It provides a flat rapidity plateau, negligible hadronic chemistry deviations, and a significantly lowered failure rate, across different tunes and string energies.
 
-While the results so far indicate that the accordion model performs well and preserves Lorentz covariance for $q\bar{q}$ hadronisation, full verification of the accordion model will require an expansion of the model to all string topologies. Next, a new tune will have to be created for the accordion model, and finally observables from the model can be compared with LHC data in order to practically test the accordion model. Future research could also involve more thorough testing and checking of particle-particle correlations as well as an analysis of runtime and computational complexity.
+While the results so far indicate that the accordion model performs well and preserves Lorentz covariance for $q\bar{q}$ hadronisation, full verification of the accordion model will require an expansion of the model to all string topologies. Next, a new tune will have to be created for the accordion model, and finally observables from the model can be compared with experimental data in order to practically test the accordion model. Future research could also involve more thorough testing and checking of particle-particle correlations as well as an analysis of runtime and computational complexity.
 
 Overall, the findings of this project indicate a glaring and longstanding issue in how the Lund model is implemented in the PYTHIA generator, and offer a promising, novel model that manifestly preserves Lorentz covariance. There are numerous new avenues of investigation opened by this research, including further development, expansion, and testing of the accordion model, as well as an investigation into issues caused by the dip in the rapidity plateau over the past decade.
 
