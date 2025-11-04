@@ -1,0 +1,36 @@
+* Overall
+
+** TODO Proofread everything
+** TODO Rerun all plots with lots of events for smoothness
+** TODO Write acknowledgements
+** TODO Write appendix deriving delta y equation
+** TODO Write table defining all variables in algorithms
+** TODO Ensure consistency of confinement scale, string tension, etc.
+** TODO Ensure consistency of PYTHIA version references.
+*** Refer once to PYTHIA 8.316 and the lowered stopmass. Otherwise, always use PYTHIA 8.315.
+** TODO Shorten footnotes.
+** TODO Check all algorithms thoroughly for consistency.
+** TODO Make algorithms floats.
+** TODO Check font size in all plots.
+
+* Introduction
+
+** TODO Rewrite section introducing finalTwo
+
+* Quantum chromodynamics and collider physics
+
+** TODO (opt) Draw Eightfold way diagram in tikz
+
+* Monte Carlo event generators and PYTHIA
+
+** TODO Ensure accuracy of factorisation description
+
+* Lund string model
+
+** TODO (opt) Draw fragmentation and yoyo diagrams in tikz/jaxodraw
+** TODO Add string topology diagram from Peter's paper
+** TODO (opt) Draw string topologies in tikz/jaxodraw
+
+* The PYTHIA fragmentation algorithm
+** TODO Update parameters table with three versions, specific version numbers
+** 
