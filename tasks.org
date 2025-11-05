@@ -33,4 +33,7 @@
 
 * The PYTHIA fragmentation algorithm
 ** TODO Update parameters table with three versions, specific version numbers
-** 
+
+* Performance of current finalTwo
+** TODO Quantify deviation from flatness with a percent
+** TODO 

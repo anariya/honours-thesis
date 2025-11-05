@@ -1,0 +1,35 @@
+Monash tune
+#CC8752
+alt: #A16130
+alt: #D9A881
+
+
+real alt: #705646
+
+JETSET tune
+#52CCC4
+alt: #30A199
+alt: #A5E4E0
+
+Hoeth tune
+#CC5297
+
+
+random colours:
+#C969B3
+#C9AF69
+#69C97F
+#6983C9
+
+
+stopmass:
+#7852AD
+
+probrevertfinal:
+C25C46
+
+stopnewflav:
+537BBD
+
+accodion:
+46B078
