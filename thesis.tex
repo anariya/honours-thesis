@@ -186,7 +186,7 @@ As mentioned in the introduction, experiments in particle physics require very h
 \begin{equation}
   E_\text{CM} \approx 2 \sqrt{E_1 E_2},
 \end{equation}
-which reduces to $E_\text{CM}=2E_b$ if the two beam energies are the same, which is common in modern colliders. The Large Hadron Collider has achieved CM energies up to \qty{13.6}{\tera\electronvolt}.
+which reduces to $E_\text{CM}=2E_1$ if the two beam energies are the same, which is common in modern colliders. The Large Hadron Collider has achieved CM energies up to \qty{13.6}{\tera\electronvolt}.
 
 Another important property of particle colliders is luminosity. While the beam and centre-of-mass energies describe the energies achieved by individual particles in the collider, the luminosity quantifies the flux of particles in the beam. Luminosities in modern colliders are quite large; the most recent LHC experiments have luminosities around \qty{5e34}{\per\square\centi\meter\per\second}.
 
@@ -355,7 +355,7 @@ Rapidity can therefore be understood as the hyperbolic angle of a particle along
 
 Figure \ref{fig:fragmentation-cm} shows a spacetime diagram of Lund string fragmentation in the longitudinal direction. There are a number of string breaks where new $q\bar{q}$ pairs are formed, and these quarks screen the colour field so that the string no longer runs between them. These string breaks result in a set of outgoing yo-yo modes, representing the outgoing hadrons. If the quark-antiquark pairs are enumerated $q_i \bar{q}_i$ along the string, then the hadrons from right to left are formed from $q_0 \bar{q}_1$, $q_1 \bar{q}_2$, and in general, $q_i \bar{q}_{i - 1}$. Each hadron has positive lightcone momentum $p^+$ and negative lightcone momentum $p^-$ that are linked by
 \begin{equation}
-  p_z^+ p_z^- = m_\perp^2,
+  p^+ p^- = m_\perp^2,
 \end{equation}
 where $m_\perp$ is the transverse mass, defined by $m_\perp^2 = m^2 + p_x^2 + p_y^2$. It is therefore possible to describe the longitudinal momentum selections of all hadrons along the string just by their positive or negative lightcone momenta, since the other is fixed by the mass-shell requirement.
 
@@ -392,7 +392,7 @@ Equation \eqref{eq:schwinger-mechanism} governs the flavour and transverse momen
 \begin{figure}
   \centering
   \includegraphics[width=0.9\linewidth]{figures/stringtopologies.jpg}
-  \caption{The various string topologies in the Lund string model. At the top-left is a $q\bar{q}$ string, and below are strings with gluon ``kinks'' along them. In the middle is a gluon loop, a topology where two gluons are connected by two strings (or three by three strings, and so on). Finally, on the right is a string junction, where three quarks (or antiquarks) with different colours form strings that meet at a central junction --- such junctions are responsible for much of the baryon production in PYTHIA \cite{Bierlich:2022pfr}.}
+  \caption{The various string topologies in the Lund string model. At the top-left is a $q\bar{q}$ string, and below are strings with gluon ``kinks'' along them. In the middle is a gluon loop, a topology where two gluons are connected by two strings (or three by three strings, and so on). Finally, on the right is a string junction, where three quarks (or antiquarks) with different colours form strings that meet at a central junction --- such junctions are responsible for much of the baryon production in PYTHIA \cite{Bierlich:2022pfr}. Figure taken from \cite{Skandss}.}
   \label{fig:string-topologies}
 \end{figure}
 
@@ -720,11 +720,11 @@ The issue with simply turning down \texttt{stopMass} (or reducing $W_\text{min}$
 \begin{figure}
   \centering
   \includesvg[width=0.9\linewidth]{figures/dNdysse_goodtune.svg}
-  \caption{The rapidity plateau and SSE for default PYTHIA 8.315 settings, and for an alternative \texttt{finalTwo} parameter tune with $\texttt{stopMass} = 0.5$ and $\texttt{stopSmear} = 0.4$. Reducing the \texttt{stopMass} paramter gives a flatter rapidity plateau, but at the cost of slightly worsened hadronic chemistry --- a further reduction in \texttt{stopMass} would make the SSE forbiddingly large.}
+  \caption{The rapidity plateau and SSE for default PYTHIA 8.315 settings, and for an alternative \texttt{finalTwo} parameter tune with $\texttt{stopMass} = 0.5$, $\texttt{stopNewFlav} = 1.75$, and $\texttt{stopSmear} = 0.4$. Reducing the \texttt{stopMass} paramter gives a flatter rapidity plateau, but at the cost of slightly worsened hadronic chemistry --- a further reduction in \texttt{stopMass} would make the SSE forbiddingly large.}
   \label{fig:dNdysse-goodtune}
 \end{figure}
 
-Since \texttt{stopSmear} primarly affects the spread of $W_\text{min}$, its main utility is in aligning the shape of the $\Delta y$ distribution between the final and regular hadrons. Figure \ref{fig:deltay-compare} shows, however, how these distributions are inherently shaped differently beyond just a dilation. Through experimentation, it was found that the values $\texttt{stopMass} = 0.5$ and $\texttt{stopSmear} = 0.4$ give a good improvement on the flatness of the rapidity plateau without a significant worsening of hadrochemistry SSE, as well in Figure \ref{fig:dNdysse-goodtune} which compares the resulting rapidity plateau and SSE with the PYTHIA 8.315 defaults.
+Since \texttt{stopSmear} primarly affects the spread of $W_\text{min}$, its main utility is in aligning the shape of the $\Delta y$ distribution between the final and regular hadrons. Figure \ref{fig:deltay-compare} shows, however, how these distributions are inherently shaped differently beyond just a dilation. Through experimentation, it was found that the values $\texttt{stopMass} = 0.5$, $\texttt{stopNewFlav} = 1.75$, and $\texttt{stopSmear} = 0.4$ give a good improvement on the flatness of the rapidity plateau without a significant worsening of hadrochemistry SSE, as well in Figure \ref{fig:dNdysse-goodtune} which compares the resulting rapidity plateau and SSE with the PYTHIA 8.315 defaults.
 
 In general, for the Monash tune, and a wide range of potential tunes, there is no way to restore Lorentz covariance using the existing \texttt{finalTwo} parameters in PYTHIA. Even a flat rapidity plateau cannot be obtained without extreme violations in Lorentz covariance of hadrochemistry along the string. Fundamentally, the issue is that there is only one degree of freedom --- the mean of $W_\text{min}$ and hence $\Delta y$ --- with which to adjust for a flat rapidity plateau. Increasing the mean improves the hadronic chemistry but worsens the dip in the rapidity plateau, and vice versa.
 
@@ -840,7 +840,7 @@ Here, a negative probability is interpreted as zero probability. Figure \ref{fig
 \begin{figure}
   \centering
   \includesvg[width=0.9\linewidth]{figures/dNdysse_goodtune_revert.svg}
-  \caption{The rapidity plateau and SSE compared between default PYTHIA 8.315 settings, the \texttt{finalTwo} parameter tune plotted in Figure \ref{fig:dNdysse-goodtune}, and a new parameter tune with $\texttt{stopMass} = 0.1$, $\texttt{stopSmear} = 0.4$, and $\texttt{probRevertFinal} = 0.3$. By introducing \texttt{probRevertFinal}, a small improvement in SSE is possible while maintaining the flatter rapidity plateau.}
+  \caption{The rapidity plateau and SSE compared between default PYTHIA 8.315 settings, the \texttt{finalTwo} parameter tune plotted in Figure \ref{fig:dNdysse-goodtune}, and a new parameter tune with $\texttt{stopMass} = 0.375$, $\texttt{stopNewFlav} = 1.35$, $\texttt{stopSmear} = 0.4$, and $\texttt{probRevertFinal} = 0.15$. By introducing \texttt{probRevertFinal}, the SSE is worse for a similar rapidity plateau to the previous tune, indicating that this parameter does not achieve the intended effect.}
   \label{fig:dNdysse-goodtunerevert}
 \end{figure}
 
@@ -848,7 +848,7 @@ Figures \ref{fig:dNdy-probrevertfinal} and \ref{fig:sse-probrevertfinal} show ho
 
 While the rapidity plateau becomes less flat as \texttt{probRevertFinal} is increased (since reverting the final break on average increases the energy available for the final two), the effect is quite mild. We can take the settings used to improve the rapidity plateau shown in Figure \ref{fig:dNdysse-goodtunerevert}, increase \texttt{probRevertFinal} in order to improve the SSE, and further decrease \texttt{stopMass} and \texttt{stopNewFlav} to account for the worsened dip.
 
-Through experimentation with all four parameters, the combination $\texttt{stopMass} = 0.1$, $\texttt{stopSmear} = 0.4$, and $\texttt{probRevertFinal} = 0.3$ was found to give a similar improvement in the rapidity plateau. However, the SSE using these parameters is more or less identical to the SSE obtained without \texttt{probRevertFinal}. In general, there was no combination of parameters found that gave a better SSE using \texttt{probRevertFinal} than what was possible without \texttt{probRevertFinal}.
+Through experimentation with all four parameters, the combination $\texttt{stopMass} = 0.375$, $\texttt{stopNewFlav} = 1.35$, $\texttt{stopSmear} = 0.4$, and $\texttt{probRevertFinal} = 0.15$ was found to give a similar improvement in the rapidity plateau. However, the SSE using these parameters is worse than the SSE obtained without \texttt{probRevertFinal}. In general, there was no combination of parameters found that gave a better SSE using \texttt{probRevertFinal} than what was possible without \texttt{probRevertFinal}.
 
 \section{Limitations}
 \begin{sloppypar} While the \texttt{probRevertFinal} parameter does allow for a small improvement in hadrochemistry SSE, this comes at the cost of worsening the dip in the rapidity plateau. This increased dip must be accounted for by further lowering the \texttt{stopMass} and \texttt{stopNewFlav} parameters, which in turn increases the SSE beyond the improvement given by \texttt{probRevertFinal}. Despite the fact that this new parameter does not give the desired result, Figure \ref{fig:dNdysse-goodtune} shows that an improvement to the rapidity plateau is still possible just by tuning the existing parameters, albeit at the cost of increased SSE. \end{sloppypar}
